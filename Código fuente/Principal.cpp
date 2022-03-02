@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 
 typedef char string[81];
 
@@ -128,11 +129,13 @@ typedef char string[81];
 			void Modulo_Prestamos_Libros();
 			void Modulo_Prestamos_Objetos();
 			
+			void Modulo_Prestamos_Libros_Listar();
 			void Modulo_Prestamos_Libros_Nuevo();
 			void Modulo_Prestamos_Libros_Editar();
 			void Modulo_Prestamos_Libros_Completar();
 			void Modulo_Prestamos_Libros_Buscar();
 			
+			void Modulo_Prestamos_Objetos_Listar();
 			void Modulo_Prestamos_Objetos_Nuevo();
 			void Modulo_Prestamos_Objetos_Editar();
 			void Modulo_Prestamos_Objetos_Completar();
@@ -2545,13 +2548,16 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 							if( strlen(Reg_Estudiantes.id) != 0 && strlen(Reg_Estudiantes.apeYNom) != 0 && strlen(Reg_Estudiantes.turno) != 0 && strlen(Reg_Estudiantes.curso) != 0 && Reg_Estudiantes.dni != 0 )
 							{	
 								// -------------- CARGA DEL REGISTRO EN ARCHIVO --------------
-								
+									
 									fwrite(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
 									
 									system("cls");
 									printf("El estudiante fue guardado exitosamente...");
 									printf("\n\n");
 									system("pause");
+								
+									fclose(arch_estudiantes);
+									arch_estudiantes = fopen("Estudiantes.dat", "a+b");
 								
 								// -----------------------------------------------------------
 								
@@ -2739,19 +2745,19 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 						
 						printf("\n   2- EDITAR APELLIDO Y NOMBRE");
 								if( strlen(apeYNom) != 0 ) 
-									printf(" (Edicion: %s)", apeYNom); 
+									printf(" (Edicion actual: %s)", apeYNom); 
 									
 						printf("\n   3- EDITAR TURNO");
 								if( strlen(turno) != 0 ) 
-									printf(" (Edicion: %s)", turno); 	
+									printf(" (Edicion actual: %s)", turno); 	
 										
 						printf("\n   4- EDITAR CURSO");
 								if( strlen(curso) != 0 ) 
-									printf(" (Edicion: %s)", curso); 
+									printf(" (Edicion actual: %s)", curso); 
 									
 						printf("\n   5- EDITAR DNI");
 								if( dni != 0 ) 
-									printf(" (Edicion: %d)", dni); 
+									printf(" (Edicion actual: %d)", dni); 
 															
 															
 						printf("\n\n   6- GUARDAR CAMBIOS");
@@ -3579,6 +3585,8 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 							rewind(arch_profesionales);
 							fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
 							
+							bandera = false;
+							
 							while(!feof(arch_profesionales) && bandera == false)
 							{
 								if( strcmp(target, Reg_Profesionales.id) == 0 && Reg_Profesionales.borrado == false)
@@ -3611,15 +3619,15 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 						
 						printf("\n   2- EDITAR APELLIDO Y NOMBRE");
 								if( strlen(apeYNom) != 0 ) 
-									printf(" (Edicion: %s)", apeYNom); 
+									printf(" (Edicion actual: %s)", apeYNom); 
 									
 						printf("\n   3- EDITAR TELEFONO");
 								if( strlen(telefono) != 0 ) 
-									printf(" (Edicion: %s)", telefono); 	
+									printf(" (Edicion actual: %s)", telefono); 	
 																
 						printf("\n   4- EDITAR DNI");
 								if( dni != 0 ) 
-									printf(" (Edicion: %d)", dni); 
+									printf(" (Edicion actual: %d)", dni); 
 															
 															
 						printf("\n\n   5- GUARDAR CAMBIOS");
@@ -4161,7 +4169,8 @@ void Modulo_Prestamos_Libros()
 		system("cls");
 		printf("--MODULO DE PRESTAMOS/LIBROS--");
 		
-		printf("\n\n\t1- NUEVO PRESTAMO");
+		printf("\n\n\t1- LISTAR PRESTAMOS");
+		printf("\n\n\t2- NUEVO PRESTAMO");
 		printf("\n\t2- EDITAR PRESTAMO");
 		printf("\n\t3- COMPLETAR PRESTAMO");
 		printf("\n\t4- BUSCAR PRESTAMO");
@@ -4176,25 +4185,35 @@ void Modulo_Prestamos_Libros()
 		{
 			case 1:
 					{
-						Modulo_Prestamos_Libros_Nuevo();	
-					}
+						Modulo_Prestamos_Libros_Listar();
+						break;	
+					}			
 			case 2:
 					{
-						Modulo_Prestamos_Libros_Editar();	
+						Modulo_Prestamos_Libros_Nuevo();
+						break;	
+						
 					}
 			case 3:
 					{
-						Modulo_Prestamos_Libros_Completar();
+						Modulo_Prestamos_Libros_Editar();
+						break;								
 					}
 			case 4:
 					{
-						Modulo_Prestamos_Libros_Buscar();
+						Modulo_Prestamos_Libros_Completar();
+						break;							
 					}
 			case 5:
 					{
-						Modulo_Prestamos();	
+						Modulo_Prestamos_Libros_Buscar();
+						break;	
 					}
 			case 6:
+					{
+						Modulo_Prestamos();	
+					}
+			case 7:
 					{
 						Salir();
 					}										
@@ -4209,7 +4228,7 @@ void Modulo_Prestamos_Libros()
 					}	
 		}	
 	}
-	while(opcion >= 1 || opcion <= 5);	
+	while(opcion >= 1 || opcion <= 6);	
 }
 
 void Modulo_Prestamos_Objetos()
@@ -4221,7 +4240,10 @@ void Modulo_Prestamos_Objetos()
 		system("cls");
 		printf("--MODULO DE PRESTAMOS/OBJETOS--");
 		
+		printf("\n\n\t1- LISTAR PRESTAMOS");
+		
 		printf("\n\n\t1- NUEVO PRESTAMO");
+		
 		printf("\n\t2- EDITAR PRESTAMO");
 		printf("\n\t3- COMPLETAR PRESTAMO");
 		printf("\n\t4- BUSCAR PRESTAMO");
@@ -4236,25 +4258,34 @@ void Modulo_Prestamos_Objetos()
 		{
 			case 1:
 					{
-						Modulo_Prestamos_Objetos_Nuevo();	
-					}
+						Modulo_Prestamos_Objetos_Listar();	
+						break;	
+					}			
 			case 2:
 					{
-						Modulo_Prestamos_Objetos_Editar();	
+						Modulo_Prestamos_Objetos_Nuevo();	
+						break;	
 					}
 			case 3:
 					{
-						Modulo_Prestamos_Objetos_Completar();	
+						Modulo_Prestamos_Objetos_Editar();	
+						break;	
 					}
 			case 4:
 					{
-						Modulo_Prestamos_Objetos_Buscar();
+						Modulo_Prestamos_Objetos_Completar();	
+						break;	
 					}
 			case 5:
 					{
-						Modulo_Prestamos();	
+						Modulo_Prestamos_Objetos_Buscar();
+						break;	
 					}
 			case 6:
+					{
+						Modulo_Prestamos();	
+					}
+			case 7:
 					{
 						Salir();
 					}										
@@ -4270,9 +4301,13 @@ void Modulo_Prestamos_Objetos()
 		}	
 		
 	}
-	while(opcion >= 1 || opcion <= 5);		
+	while(opcion >= 1 || opcion <= 6);		
 }
 
+void Modulo_Prestamos_Libros_Listar()
+{
+	
+}
 
 void Modulo_Prestamos_Libros_Nuevo()
 {
@@ -4307,6 +4342,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 			case 3:
 					{
 						Modulo_Prestamos_Libros();		
+						break;	
 					}
 			case 4:
 					{
@@ -4424,6 +4460,11 @@ void Modulo_Prestamos_Libros_Nuevo_Socios()
 	
 }
 
+
+void Modulo_Prestamos_Objetos_Listar()
+{
+	
+}
 
 void Modulo_Prestamos_Objetos_Nuevo()
 {
