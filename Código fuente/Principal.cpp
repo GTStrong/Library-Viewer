@@ -8,6 +8,13 @@ typedef char string[81];
 
 // ---------REGISTROS----------
 
+	struct Fecha
+	{
+		string dd;
+		string mm;
+		string aaaa;	
+	};
+
 	struct Estudiantes
 	{
 		string id;
@@ -50,9 +57,9 @@ typedef char string[81];
 		string nombre;
 		
 		bool borrado;
-	};
+	};	
 	
-	struct Prestamo_Libros
+	struct Prestamos_Libros
 	{
 		int codigo;
 		int cantidad;
@@ -60,10 +67,12 @@ typedef char string[81];
 		string titulo;
 		string prestatario;
 		
+		Fecha fecha;
+		
 		bool borrado;	
 	};	
 	
-	struct Prestamo_Objetos
+	struct Prestamos_Objetos
 	{
 		int codigo;
 		
@@ -71,15 +80,12 @@ typedef char string[81];
 		string prestatario;
 		string cantidad;
 		
+		Fecha fecha;
+		
 		bool borrado;	
 };
 
-	struct Fecha
-	{
-		int dd;
-		int mm;
-		int aaaa;	
-	};
+
 // ----------------------------
 
 
@@ -424,7 +430,7 @@ void Modulo_Biblioteca_Libros_ListarLibros()
 		if(arch_libros == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo Libros.dat");
+			printf("ERROR: No se pudo abrir el archivo Libros.dat");
 			printf("\n\n(No hay ningun libro en la base de datos)");
 			printf("\n\n");
 		}
@@ -450,7 +456,7 @@ void Modulo_Biblioteca_Libros_ListarLibros()
 			{
 				bandera = true;
 				
-				printf("LIBRO [%d]", i+1);
+				printf("LIBRO [%d]\n", i+1);
 			
 				printf("\n\tCodigo: %s", Reg_Libros.codigo);
 				printf("\n\tTitulo: %s",Reg_Libros.titulo);
@@ -458,7 +464,11 @@ void Modulo_Biblioteca_Libros_ListarLibros()
 				printf("\n\tSeccion: %s", Reg_Libros.seccion);
 				printf("\n\tAutor: %s", Reg_Libros.autor);
 				printf("\n\tExistencias: %d", Reg_Libros.existencias);
-				printf("\n\n\n");
+				printf("\n\n");
+				
+				printf("------------------------------------------------------------------");
+				
+				printf("\n\n");
 				
 				i++;	
 			}
@@ -474,6 +484,7 @@ void Modulo_Biblioteca_Libros_ListarLibros()
 		}
 	}
 	
+	printf("\n\n");
 	system("pause");
 	fclose(arch_libros);	
 }
@@ -489,7 +500,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 	if(arch_libros == NULL)
 	{
 		system("cls");
-		printf("ERROR. No se pudo crear el archivo Libros.dat");
+		printf("ERROR: No se pudo crear el archivo Libros.dat");
 		printf("\n\n");
 		system("pause");	
 	}	
@@ -533,7 +544,6 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 			printf("\n\n\t3- CERRAR APLICACION");
 	
 			printf("\n\nSELECCIONE UNA OPCION: ");
-			
 			opcion = Comprobacion_Tecla_Escape();
 		
 			switch( opcion )
@@ -561,6 +571,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 												for(int i=0; i<strlen(codigo); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
 													codigo[i] = NULL;
 												
+												fclose(arch_libros);
 												Modulo_Biblioteca_Libros_NuevoLibro(); // Salida de la carga de datos.								
 											}
 											
@@ -688,8 +699,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 							// -------------------------------------------------------------------------------------------
 							
 							if(band_codigo == true && band_titulo == true && band_editorial == true && band_seccion == true && band_autor == true && band_existencias == true)
-							{	
-														 	
+							{						 	
 							 	do
 							 	{
 									system("cls");
@@ -704,7 +714,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 
 									printf("\n\nDESEA CARGAR EL LIBRO EN LA BASE DE DATOS(SI|NO): ");
 					 				_flushall();
-					 				gets( centinela );
+					 				gets(centinela);
 					 				strupr(centinela);
 					 			
 					 				if(strcmp(centinela, "SI") == 0)
@@ -752,13 +762,12 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 									{
 										system("cls");
 										printf("No se ha cargado el libro.");
-										printf("\n\nVolviendo a Biblioteca/Libros...");
 										printf("\n\n");
 										system("pause");
 										
 										// -------- REVALORIZACION DE VARIABLES A UN VALOR NULO -------- 
 										
-											for(int i=0; i<strlen(codigo); i++)
+											/*for(int i=0; i<strlen(codigo); i++)
 												codigo[i] = NULL;
 						
 											for(int i=0; i<strlen(titulo); i++)
@@ -780,7 +789,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 											band_editorial = NULL;		
 											band_seccion = NULL;
 											band_autor = NULL;
-											band_existencias = NULL;
+											band_existencias = NULL;*/
 											
 											// Esto se hace porque al retornar hacia el switch principal, los campos quedan con los datos anteriormente cargados.
 											
@@ -795,7 +804,6 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 									}		
 								}
 								while(strcmp(centinela, "SI") != 0 && strcmp(centinela, "NO") != 0);
-								
 							}
 							else
 							{
@@ -844,8 +852,8 @@ void Modulo_Biblioteca_Libros_EditarLibro()
 		if(arch_libros == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo Libros.dat");
-			printf("\n\n(No hay ningun libro en la base de datos)");
+			printf("ERROR: El archivo 'Libros.dat' no existe.");
+			printf("\n\n(Se tiene que cargar al menos un libro)");
 			printf("\n\n");
 			system("pause");
 		}
@@ -1279,8 +1287,8 @@ void Modulo_Biblioteca_Libros_EliminarLibro()
 		if(arch_libros == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo Libros.dat");
-			printf("\n\n(No hay ningun libro en la base de datos)");
+			printf("ERROR: El archivo 'Libros.dat' no existe.");
+			printf("\n\n(Se tiene que cargar al menos un libro)");
 			printf("\n\n");
 			system("pause");
 		}
@@ -1296,10 +1304,18 @@ void Modulo_Biblioteca_Libros_EliminarLibro()
 		
 		// ------------ BUSQUEDA DEL CODIGO DEL LIBRO EN EL ARCHIVO ------------
 		
-			system("cls");	
-			printf("INGRESE EL CODIGO DEL LIBRO A ELIMINAR: ");
+			system("cls");
+			printf("-- BORRADO DE UN LIBRO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tINGRESE EL CODIGO DEL LIBRO A ELIMINAR: ");
 			_flushall();
 			gets(target);	
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_libros);
+				Modulo_Biblioteca_Libros();
+			}	
 			
 			bandera = false;
 			rewind(arch_libros);
@@ -1389,6 +1405,8 @@ void Modulo_Biblioteca_Libros_EliminarLibro()
 						printf("\n\n");
 						system("pause");
 						system("cls");
+						
+						fclose(arch_libros);
 					}
 					else if( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) ) // Cadena ingresada es distinta de SI y NO
 					{
@@ -1410,7 +1428,8 @@ void Modulo_Biblioteca_Libros_EliminarLibro()
 				printf("\n\n");
 				system("pause");
 				system("cls");
-					
+				
+				fclose(arch_libros);	
 				Modulo_Biblioteca_Libros(); // Retornar a la funcion
 			}
 
@@ -1423,13 +1442,13 @@ void Modulo_Biblioteca_Libros_BuscarLibro()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 		FILE *arch_libros;
-		arch_libros = fopen("Libros.dat", "r+b");
+		arch_libros = fopen("Libros.dat", "rb");
 			
 		if(arch_libros == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo Libros.dat");
-			printf("\n\n(No hay ningun libro en la base de datos)");
+			printf("ERROR: El archivo 'Libros.dat' no existe.");
+			printf("\n\n(Se tiene que cargar al menos un libro)");
 			printf("\n\n");
 			system("pause");
 		}
@@ -1444,10 +1463,18 @@ void Modulo_Biblioteca_Libros_BuscarLibro()
 		
 		// ------------ BUSQUEDA DEL CODIGO DEL LIBRO EN EL ARCHIVO ------------
 		
-			system("cls");	
-			printf("INGRESE EL CODIGO DEL LIBRO A BUSCAR: ");
+			system("cls");
+			printf("-- BUSQUEDA DE UN LIBRO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tINGRESE EL CODIGO DEL LIBRO A BUSCAR: ");
 			_flushall();
 			gets(target);	
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_libros);
+				Modulo_Biblioteca_Libros();
+			}	
 			
 			bandera = false;
 			rewind(arch_libros);
@@ -1478,7 +1505,9 @@ void Modulo_Biblioteca_Libros_BuscarLibro()
 			
 			printf("\n\n");
 			system("pause");
-			system("cls");		
+			system("cls");	
+			
+			fclose(arch_libros);	
 		}
 		else
 		{
@@ -1488,7 +1517,8 @@ void Modulo_Biblioteca_Libros_BuscarLibro()
 			printf("\n\n");
 			system("pause");
 			system("cls");
-				
+			
+			fclose(arch_libros);	
 			Modulo_Biblioteca_Libros(); // Retornar a la funcion
 		}
 	}
@@ -1506,8 +1536,8 @@ void Modulo_Biblioteca_Objetos_ListarObjetos()
 		if(arch_objetos == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo Objetos.dat");
-			printf("\n\n(No hay ningun objeto en la base de datos)");
+			printf("ERROR: El archivo 'Objetos.dat' no existe.");
+			printf("\n\n(Se tiene que cargar al menos un objeto)");
 			printf("\n\n");
 		}
 		
@@ -1557,7 +1587,7 @@ void Modulo_Biblioteca_Objetos_ListarObjetos()
 }
 
 void Modulo_Biblioteca_Objetos_NuevoObjeto()
-{
+{ 
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 	FILE *arch_objetos;
@@ -1567,7 +1597,7 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 	if(arch_objetos == NULL)
 	{
 		system("cls");
-		printf("ERROR. No se pudo crear el archivo Objetos.dat");
+		printf("ERROR: No se pudo crear el archivo Objetos.dat");
 		printf("\n\n");
 		system("pause");	
 	}	
@@ -1612,8 +1642,6 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 				case '1':
 						{
 							system("cls");
-							
-							// ------------------------------ CARGA DE LOS DATOS ------------------------------
 							
 							// ------------------------------ CARGA DE LOS DATOS ------------------------------
 								do
@@ -1835,8 +1863,8 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 		if(arch_objetos == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo Objetos.dat");
-			printf("\n\n(No hay ningun objeto en la base de datos)");
+			printf("ERROR: El archivo 'Objetos.dat' no existe.");
+			printf("\n\n(Se tiene que cargar al menos un objeto)");
 			printf("\n\n");
 			system("pause");
 		}
@@ -2182,8 +2210,8 @@ void Modulo_Biblioteca_Objetos_EliminarObjeto()
 		if(arch_objetos == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo Libros.dat");
-			printf("\n\n(No hay ningun libro en la base de datos)");
+			printf("ERROR: El archivo 'Objetos.dat' no existe.");
+			printf("\n\n(Se tiene que cargar al menos un objeto)");
 			printf("\n\n");
 			system("pause");
 		}
@@ -2198,12 +2226,19 @@ void Modulo_Biblioteca_Objetos_EliminarObjeto()
 		bool bandera = false;
 		
 		// ------------ BUSQUEDA DEL CODIGO DEL LIBRO EN EL ARCHIVO ------------
-		
-		
-			system("cls");	
-			printf("INGRESE EL CODIGO DEL OBJETO A ELIMINAR: ");
+	
+			system("cls");
+			printf("-- BORRADO DE UN OBJETO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tINGRESE EL CODIGO DEL OBJETO A ELIMINAR: ");
 			_flushall();
 			gets(target);	
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_objetos);
+				Modulo_Biblioteca_Objetos();
+			}	
 			
 			bandera = false;
 			rewind(arch_objetos);
@@ -2292,6 +2327,8 @@ void Modulo_Biblioteca_Objetos_EliminarObjeto()
 						printf("\n\n");
 						system("pause");
 						system("cls");
+						
+						fclose(arch_objetos);
 					}
 					else if( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) ) // Cadena ingresada es distinta de SI y NO
 					{
@@ -2315,6 +2352,7 @@ void Modulo_Biblioteca_Objetos_EliminarObjeto()
 				system("pause");
 				system("cls");
 				
+				fclose(arch_objetos);
 				Modulo_Biblioteca_Objetos(); // Retornar a la funcion
 			}
 	
@@ -2326,13 +2364,13 @@ void Modulo_Biblioteca_Objetos_BuscarObjeto()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 		FILE *arch_objetos;
-		arch_objetos = fopen("Objetos.dat", "r+b");
+		arch_objetos = fopen("Objetos.dat", "rb");
 			
 		if(arch_objetos == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo Objetos.dat");
-			printf("\n\n(No hay ningun libro en la base de datos)");
+			printf("ERROR: El archivo 'Objetos.dat' no existe.");
+			printf("\n\n(Se tiene que cargar al menos un objeto)");
 			printf("\n\n");
 			system("pause");
 		}
@@ -2347,10 +2385,18 @@ void Modulo_Biblioteca_Objetos_BuscarObjeto()
 		
 		// ------------ BUSQUEDA DEL CODIGO DEL LIBRO EN EL ARCHIVO ------------
 		
-			system("cls");	
-			printf("INGRESE EL CODIGO DEL LIBRO A BUSCAR: ");
+			system("cls");
+			printf("-- BUSQUEDA DE UN OBJETO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tINGRESE EL CODIGO DEL OBJETO A BUSCAR: ");
 			_flushall();
 			gets(target);	
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_objetos);
+				Modulo_Biblioteca_Objetos();
+			}
 			
 			bandera = false;
 			rewind(arch_objetos);
@@ -2378,7 +2424,9 @@ void Modulo_Biblioteca_Objetos_BuscarObjeto()
 			
 			printf("\n\n");
 			system("pause");
-			system("cls");		
+			system("cls");
+			
+			fclose(arch_objetos);		
 		}
 		else
 		{
@@ -2388,10 +2436,12 @@ void Modulo_Biblioteca_Objetos_BuscarObjeto()
 			printf("\n\n");
 			system("pause");
 			system("cls");
+			
+			fclose(arch_objetos);	
 				
 			Modulo_Biblioteca_Objetos(); // Retornar a la funcion
 		}
-	}
+	} // Cierre de if de archivo.
 }
 
 
@@ -2700,7 +2750,8 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 		bool band_apeYNom = NULL;
 		bool band_dni = NULL;
 		bool band_curso = NULL;
-		bool band_turno = NULL;		
+		bool band_turno = NULL;	
+		bool estudiante_existente = NULL;	
 				
 		do
 		{
@@ -2723,23 +2774,55 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 			{
 				case '1':
 						{
-							system("cls");
-							
 							// ------------------------------ CARGA DE LOS DATOS ------------------------------
-							
+							do	
+							{
+								estudiante_existente = NULL;
+								
+								system("cls");
 								printf("-- CARGA DE DATOS DEL NUEVO SOCIO --");
 							 	printf("\n\n(Si desea cancelar, escriba 'salir')");
 							 	
-							 	printf("\n\n\tINGRESE ID DE SOCIO: ");
-								_flushall();
-								gets(id);
-									if(strcmp(id, "salir") == 0)
-									{
-										for(int i=0; i<strlen(id); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
-											id[i] = NULL;
-					
-										break; // Salida del "case 1".									
-									}
+										 	// ------ COMPROBACION DE EXISTENCIA DEL CODIGO ------
+		
+									 	printf("\n\n\tINGRESE ID DEL SOCIO: ");
+										_flushall();
+										gets(id);
+											if(strcmp(id, "salir") == 0)
+											{
+												for(int i=0; i<strlen(id); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+													id[i] = NULL;
+												
+												fclose(arch_estudiantes);
+												Modulo_Socios_Estudiantes_NuevoEstudiante(); // Salida de la carga de datos.								
+											}
+											
+										rewind(arch_estudiantes);
+										fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+										
+										while(!feof(arch_estudiantes) && estudiante_existente == false)
+										{
+											if(strcmp(id, Reg_Estudiantes.id) == 0)
+											{
+												estudiante_existente = true;		
+												break;
+											}
+												
+											if(estudiante_existente == false)
+												fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+										}
+										
+										if(estudiante_existente == true)
+										{
+											system("cls");
+											printf("El ID ingresado ya existe. Ingrese nuevamente...");
+											printf("\n\n");
+											system("pause");
+										}	
+									}	
+									while(estudiante_existente == true);
+									
+								// ---------------------------------------------------
 					
 								
 								printf("\tAPELLIDO Y NOMBRE: ");
@@ -3333,7 +3416,8 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 											printf("\n\n");
 											system("pause");
 											system("cls");
-												
+											
+											fclose(arch_estudiantes);	
 											strcpy(target, auxiliar); // La variable "target" toma el valor del auxiliar, que es del target anterior.	
 											//Modulo_Socios_Estudiantes()
 										}
@@ -3342,11 +3426,13 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 									}						
 							case '0':
 									{
+										fclose(arch_estudiantes);
 										Modulo_Socios_Estudiantes();	
 										break;
 									}
 							case '8':
 									{
+										fclose(arch_estudiantes);
 										Salir();
 									}																															
 							default:
@@ -3370,6 +3456,7 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 			printf("\n\n");
 			system("pause");
 			system("cls");	
+			fclose(arch_estudiantes);
 		}
 	}
 	
@@ -3404,10 +3491,18 @@ void Modulo_Socios_Estudiantes_EliminarEstudiante()
 		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
 		
 		
-			system("cls");	
-			printf("INGRESE EL ID DEL ESTUDIANTE A ELIMINAR: ");
+			system("cls");
+			printf("-- BORRADO DE UN SOCIO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tINGRESE ID DEL ESTUDIANTE A ELIMINAR: ");
 			_flushall();
 			gets(target);	
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_estudiantes);
+				Modulo_Socios_Estudiantes();
+			}	
 			
 			bandera = false;
 			rewind(arch_estudiantes);
@@ -3496,6 +3591,8 @@ void Modulo_Socios_Estudiantes_EliminarEstudiante()
 						printf("\n\n");
 						system("pause");
 						system("cls");
+						
+						fclose(arch_estudiantes);
 					}
 					else if( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) ) // Cadena ingresada es distinta de SI y NO
 					{
@@ -3519,6 +3616,7 @@ void Modulo_Socios_Estudiantes_EliminarEstudiante()
 				system("pause");
 				system("cls");
 				
+				fclose(arch_estudiantes);
 				Modulo_Socios_Estudiantes(); // Retornar a la funcion
 			}
 	
@@ -3552,10 +3650,18 @@ void Modulo_Socios_Estudiantes_BuscarEstudiante()
 		
 		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
 		
-			system("cls");	
-			printf("INGRESE ID DE ESTUDIANTE A BUSCAR: ");
+			system("cls");
+			printf("-- BUSQUEDA DE UN SOCIO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tINGRESE ID DEL ESTUDIANTE A BUSCAR: ");
 			_flushall();
 			gets(target);	
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_estudiantes);
+				Modulo_Socios_Estudiantes();
+			}	
 			
 			bandera = false;
 			rewind(arch_estudiantes);
@@ -3585,17 +3691,19 @@ void Modulo_Socios_Estudiantes_BuscarEstudiante()
 			
 			printf("\n\n");
 			system("pause");
-			system("cls");		
+			system("cls");	
+			
+			fclose(arch_estudiantes);	
 		}
 		else
 		{
 			system("cls");
 			printf("No se encontro el ID del estudiante ingresado...");
-			printf("\n\nVolviendo a pantalla anterior...");
 			printf("\n\n");
 			system("pause");
 			system("cls");
-				
+			
+			fclose(arch_estudiantes);		
 			Modulo_Socios_Estudiantes(); // Retornar a la funcion
 		}
 	}	
@@ -3699,6 +3807,7 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 		bool band_apeYNom = NULL;
 		bool band_dni = NULL;	
 		bool band_telefono = NULL;
+		bool profesional_existente = NULL;
 		
 		do
 		{
@@ -3714,31 +3823,61 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 			printf("\n\n\t3- CERRAR APLICACION");
 	
 			printf("\n\nSELECCIONE UNA OPCION: ");
-			
 			opcion = Comprobacion_Tecla_Escape();
 		
 			switch( opcion )
 			{
 				case '1':
 						{
-							system("cls");
-							
-							// ------------------------------ CARGA DE LOS DATOS ------------------------------
-							
+							do	
+							{
+								// ------------------------------ CARGA DE LOS DATOS ------------------------------
+								profesional_existente = NULL;
+								
+								system("cls");
 								printf("-- CARGA DE DATOS DEL NUEVO SOCIO --");
 							 	printf("\n\n(Si desea cancelar, escriba 'salir')");
 							 	
-							 	printf("\n\n\tINGRESE ID DE SOCIO: ");
-								_flushall();
-								gets(id);
-									if(strcmp(id, "salir") == 0)
-									{
-										for(int i=0; i<strlen(id); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
-											id[i] = NULL;
-					
-										break; // Salida del "case 1".									
-									}
-					
+										 	// ------ COMPROBACION DE EXISTENCIA DEL CODIGO ------
+		
+									 	printf("\n\n\tINGRESE ID DEL PROFESIONAL: ");
+										_flushall();
+										gets(id);
+											if(strcmp(id, "salir") == 0)
+											{
+												for(int i=0; i<strlen(id); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+													id[i] = NULL;
+												
+												fclose(arch_profesionales);
+												Modulo_Socios_Profesionales_NuevoProfesional(); // Salida de la carga de datos.								
+											}
+											
+										rewind(arch_profesionales);
+										fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+										
+										while(!feof(arch_profesionales) && profesional_existente == false)
+										{
+											if(strcmp(id, Reg_Profesionales.id) == 0)
+											{
+												profesional_existente = true;		
+												break;
+											}
+												
+											if(profesional_existente == false)
+												fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+										}
+										
+										if(profesional_existente == true)
+										{
+											system("cls");
+											printf("El ID ingresado ya existe. Ingrese nuevamente...");
+											printf("\n\n");
+											system("pause");
+										}	
+									}	
+									while(profesional_existente == true);
+									
+								// ---------------------------------------------------
 								
 								printf("\tAPELLIDO Y NOMBRE: ");
 								_flushall();
@@ -3828,7 +3967,6 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 					 				if(strcmp(centinela, "SI") == 0)
 					 				{
 										fseek(arch_profesionales, 2, SEEK_END);
-										
 										fwrite(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
 										
 										system("cls");
@@ -3866,7 +4004,7 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 										printf("\n\n");
 										system("pause");
 										
-										// -------- REVALORIZACION DE VARIABLES A UN VALOR NULO -------- 
+										/*// -------- REVALORIZACION DE VARIABLES A UN VALOR NULO -------- 
 										
 											for(int i=0; i<strlen(id); i++)
 												id[i] = NULL;
@@ -3887,7 +4025,7 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 											
 											// Esto se hace porque al retornar hacia el switch principal, los campos quedan con los datos anteriormente cargados.
 											
-										// -------------------------------------------------------------			 														
+										// -------------------------------------------------------------*/			 														
 									}
 									else if(strcmp(centinela, "SI") != 0 && strcmp(centinela, "NO") != 0)
 									{
@@ -4284,7 +4422,8 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 											printf("\n\n");
 											system("pause");
 											system("cls");
-												
+											
+											fclose(arch_profesionales);	
 											strcpy(target, auxiliar); // La variable "target" toma el valor del auxiliar, que es del target anterior.	
 											//Modulo_Socios_Estudiantes()
 										}
@@ -4293,11 +4432,13 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 									}						
 							case '0':
 									{
+										fclose(arch_profesionales);
 										Modulo_Socios_Profesionales();	
 										break;
 									}
 							case '7':
 									{
+										fclose(arch_profesionales);
 										Salir();
 									}																															
 							default:
@@ -4320,7 +4461,8 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 			printf("No se encontro el ID del profesional ingresado...");
 			printf("\n\n");
 			system("pause");
-			system("cls");	
+			system("cls");
+			fclose(arch_profesionales);	
 		}
 	}
 		
@@ -4354,11 +4496,18 @@ void Modulo_Socios_Profesionales_EliminarProfesional()
 		
 		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
 		
-		
-			system("cls");	
-			printf("INGRESE ID DE PROFESIONAL A ELIMINAR: ");
+			system("cls");
+			printf("-- BORRADO DE UN SOCIO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tINGRESE ID DEL PROFESIONAL A ELIMINAR: ");
 			_flushall();
 			gets(target);	
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_profesionales);
+				Modulo_Socios_Profesionales();
+			}	
 			
 			bandera = false;
 			rewind(arch_profesionales);
@@ -4447,6 +4596,8 @@ void Modulo_Socios_Profesionales_EliminarProfesional()
 						printf("\n\n");
 						system("pause");
 						system("cls");
+						
+						fclose(arch_profesionales);
 					}
 					else if( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) ) // Cadena ingresada es distinta de SI y NO
 					{
@@ -4470,6 +4621,7 @@ void Modulo_Socios_Profesionales_EliminarProfesional()
 				system("pause");
 				system("cls");
 				
+				fclose(arch_profesionales);
 				Modulo_Socios_Profesionales(); // Retornar a la funcion
 			}
 	
@@ -4503,10 +4655,18 @@ void Modulo_Socios_Profesionales_BuscarProfesional()
 		
 		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
 		
-			system("cls");	
-			printf("INGRESE ID DE PROFESIONAL A BUSCAR: ");
+			system("cls");
+			printf("-- BUSQUEDA DE UN SOCIO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tINGRESE ID DEL PROFESIONAL A BUSCAR: ");
 			_flushall();
 			gets(target);	
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_profesionales);
+				Modulo_Socios_Profesionales();
+			}	
 			
 			bandera = false;
 			rewind(arch_profesionales);
@@ -4535,7 +4695,9 @@ void Modulo_Socios_Profesionales_BuscarProfesional()
 			
 			printf("\n\n");
 			system("pause");
-			system("cls");		
+			system("cls");	
+			
+			fclose(arch_profesionales);		
 		}
 		else
 		{
@@ -4546,6 +4708,7 @@ void Modulo_Socios_Profesionales_BuscarProfesional()
 			system("pause");
 			system("cls");
 				
+			fclose(arch_profesionales);	
 			Modulo_Socios_Profesionales(); // Retornar a la funcion
 		}
 	}	
@@ -4610,8 +4773,8 @@ void Modulo_Prestamos()
 
 void Modulo_Prestamos_Libros()
 {
-	int opcion = 0;
-	
+	char opcion = NULL;
+		
 	do
 	{
 		system("cls");
@@ -4623,45 +4786,44 @@ void Modulo_Prestamos_Libros()
 		printf("\n\t3- COMPLETAR PRESTAMO");
 		printf("\n\t4- BUSCAR PRESTAMO");
 		
-		printf("\n\n\t5- VOLVER(MODULO PRESTAMOS)");
-		printf("\n\t6- CERRAR APLICACION");
+		printf("\n\n\t5- CERRAR APLICACION");
 		
 		printf("\n\nSELECCIONE UNA OPCION: ");
-		scanf("%d", &opcion);
+		opcion = Comprobacion_Tecla_Escape();
 		
 		switch(opcion)
 		{
-			case 1:
+			case '1':
 					{
 						Modulo_Prestamos_Libros_Listar();
 						break;	
 					}			
-			case 2:
+			case '2':
 					{
 						Modulo_Prestamos_Libros_Nuevo();
 						break;	
 						
 					}
-			case 3:
+			case '3':
 					{
 						Modulo_Prestamos_Libros_Editar();
 						break;								
 					}
-			case 4:
+			case '4':
 					{
 						Modulo_Prestamos_Libros_Completar();
 						break;							
 					}
-			case 5:
+			case '5':
 					{
 						Modulo_Prestamos_Libros_Buscar();
 						break;	
 					}
-			case 6:
+			case '0':
 					{
 						Modulo_Prestamos();	
 					}
-			case 7:
+			case '6':
 					{
 						Salir();
 					}										
@@ -4676,12 +4838,12 @@ void Modulo_Prestamos_Libros()
 					}	
 		}	
 	}
-	while(opcion >= 1 || opcion <= 6);	
+	while(true);	
 }
 
 void Modulo_Prestamos_Objetos()
 {
-	int opcion = 0;
+	char opcion = NULL;
 	
 	do
 	{
@@ -4696,44 +4858,43 @@ void Modulo_Prestamos_Objetos()
 		printf("\n\t3- COMPLETAR PRESTAMO");
 		printf("\n\t4- BUSCAR PRESTAMO");
 		
-		printf("\n\n\t5- VOLVER(MODULO PRESTAMOS)");
-		printf("\n\t6- CERRAR APLICACION");
+		printf("\n\n\t5- CERRAR APLICACION");
 		
 		printf("\n\nSELECCIONE UNA OPCION: ");
-		scanf("%d", &opcion);
+		opcion = Comprobacion_Tecla_Escape();
 		
 		switch(opcion)
 		{
-			case 1:
+			case '1':
 					{
 						Modulo_Prestamos_Objetos_Listar();	
 						break;	
 					}			
-			case 2:
+			case '2':
 					{
 						Modulo_Prestamos_Objetos_Nuevo();	
 						break;	
 					}
-			case 3:
+			case '3':
 					{
 						Modulo_Prestamos_Objetos_Editar();	
 						break;	
 					}
-			case 4:
+			case '4':
 					{
 						Modulo_Prestamos_Objetos_Completar();	
 						break;	
 					}
-			case 5:
+			case '5':
 					{
 						Modulo_Prestamos_Objetos_Buscar();
 						break;	
 					}
-			case 6:
+			case '0':
 					{
 						Modulo_Prestamos();	
 					}
-			case 7:
+			case '6':
 					{
 						Salir();
 					}										
@@ -4749,7 +4910,7 @@ void Modulo_Prestamos_Objetos()
 		}	
 		
 	}
-	while(opcion >= 1 || opcion <= 6);		
+	while(true);		
 }
 
 void Modulo_Prestamos_Libros_Listar()
@@ -4808,12 +4969,12 @@ void Modulo_Prestamos_Libros_Nuevo()
 		}	
 		
 	}
-	while(opcion >= 1 || opcion <= 3);	
+	while(true);	
 }
 
 void Modulo_Prestamos_Libros_Editar()
 {
-	int opcion = 0;
+	char opcion = NULL;
 	
 	system("cls");
 	printf("INGRESE EL CODIGO DEL PRESTAMO: ");
@@ -4830,39 +4991,38 @@ void Modulo_Prestamos_Libros_Editar()
 		
 		printf("\n\n\t5- GUARDAR PRESTAMO");
 		
-		printf("\n\n\t6- VOLVER(MODULO PRESTAMOS/LIBROS)");
-		printf("\n\t7- CERRAR APLICACION");
+		printf("\n\n\t6- CERRAR APLICACION");
 		
 		printf("\n\nSELECCIONE UNA OPCION: ");
-		scanf("%d", &opcion);
+		opcion = Comprobacion_Tecla_Escape();
 		
 		switch(opcion)
 		{
-			case 1:
+			case '1':
 					{
 						break;
 					}
-			case 2:
+			case '2':
 					{
 						break;
 					}
-			case 3:
+			case '3':
 					{
 						break;
 					}
-			case 4:
+			case '4':
 					{
 						break;
 					}	
-			case 5:
+			case '5':
 					{
 						break;	
 					}
-			case 6:
+			case '0':
 					{
 						Modulo_Prestamos_Libros();	
 					}
-			case 7:
+			case '6':
 					{
 						Salir();
 					}																							
@@ -4878,7 +5038,7 @@ void Modulo_Prestamos_Libros_Editar()
 		}	
 		
 	}
-	while(opcion >= 1 || opcion <= 6);	
+	while(true);	
 }
 
 void Modulo_Prestamos_Libros_Completar()
@@ -4900,7 +5060,266 @@ void Modulo_Prestamos_Libros_Buscar()
 
 void Modulo_Prestamos_Libros_Nuevo_Particular()
 {
+	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
+	FILE *arch_prestamos_l;
+	
+	arch_prestamos_l = fopen("Prestamos_L.dat", "a+b");
+	
+	if(arch_prestamos_l == NULL)
+	{
+		system("cls");
+		printf("ERROR. No se pudo crear el archivo Prestamos_L.dat");
+		printf("\n\n");
+		system("pause");	
+	}	
+	
+	// ----------------------------------------------------------
+	
+	else
+	{	
+		Prestamos_Libros Reg_Prestamos_L;
+		
+		char opcion = NULL; // variable centinela para switch principal.
+	
+		string centinela = {NULL}; // variable centinela para SI|NO en la carga del archivo.
+		string centinela_PoE = {NULL};
+		string id = {NULL};
+		string apeYNom = {NULL}; 
+		string dni = {NULL};
+		string telefono = {NULL};
+			
+		bool band_id = NULL;
+		bool band_apeYNom = NULL;
+		bool band_dni = NULL;	
+		bool band_telefono = NULL;
+		
+		do
+		{
+			opcion = NULL;
+			
+			system("cls");
+			
+			printf("-- MODULO DE PRESTAMOS/ESTUDIANTES/NUEVO PRESTAMO --");
+			
+			printf("\n\n\t1- INGRESAR PRESTAMO");
+			printf("\n\t2- GUARDAR PRESTAMO");
+			
+			printf("\n\n\t3- CERRAR APLICACION");
+	
+			printf("\n\nSELECCIONE UNA OPCION: ");
+			opcion = Comprobacion_Tecla_Escape();
+		
+			switch( opcion )
+			{
+				case '1':
+						{
+							system("cls");
+							
+							// ------------------------------ CARGA DE LOS DATOS ------------------------------
+								
+								printf("-- CARGA DE DATOS DEL NUEVO PRESTAMO --");
+							 	printf("\n\n(Si desea cancelar, escriba 'salir')");
+							 	
+							 	printf("\n\nES PROFESIONAL(SI|NO): ");
+							 	_flushall();
+							 	gets(centinela_PoE);
+							 	
+							 	printf("\n\n\tINGRESE ID DE SOCIO: ");
+								_flushall();
+								gets(id);
+									if(strcmp(id, "salir") == 0)
+									{
+										for(int i=0; i<strlen(id); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+											id[i] = NULL;
+					
+										break; // Salida del "case 1".									
+									}
+																					
+								printf("\tDNI: ");
+								_flushall();
+								gets(dni);
+									if(strcmp(dni, "salir") == 0)
+									{
+										for(int i=0; i<strlen(dni); i++)
+											dni[i] = NULL;
+																				
+										break;										
+									}														
+									
+								printf("\tTELEFONO: ");
+								_flushall();
+								gets(telefono);
+									if(strcmp(telefono, "salir") == 0)
+									{
+										for(int i=0; i<strlen(telefono); i++)
+											telefono[i] = NULL;
+																			
+										break;										
+									}
+
+							// --------------------------------------------------------------------------------
+							
+							break;
+						 }
+				case '2':
+						{	
+							// ------------------------------ COMPROBACIÓN DE CAMPOS VACIOS ------------------------------	
+										 				 	
+								if(strlen(id) != 0)
+						 		{
+						 			strcpy(Reg_Profesionales.id, id);
+									band_id = true;						 			
+								}
+		
+						 		if(strlen(apeYNom) != 0)
+						 		{
+						 			strcpy(Reg_Profesionales.apeYNom, apeYNom);		
+									band_apeYNom = true;				 			
+								}
+	
+							 	if(strlen(dni) != 0)
+						 		{
+						 			strcpy(Reg_Profesionales.dni, dni);
+									band_dni = true;						 				
+								}
+								
+						 		if(strlen(telefono) != 0)
+						 		{
+						 			strcpy(Reg_Profesionales.telefono, telefono);	
+									band_telefono = true;						 			
+								}
+							
+							// -------------------------------------------------------------------------------------------
+							
+							if(band_id == true && band_apeYNom == true && band_telefono == true && band_dni == true)
+							{	
+														 	
+							 	do
+							 	{
+									system("cls");
+								 	printf("DATOS INGRESADOS: ");
+								 	
+								 	printf("\n\n\tID: %s", id);
+								 	printf("\n\tApellido y nombre: %s", apeYNom);
+								 	printf("\n\tDNI: %s", dni);
+								 	printf("\n\tTelefono: %s", telefono);
+								 	
+									printf("\n\nDESEA CARGAR EL SOCIO EN LA BASE DE DATOS(SI|NO): ");
+					 				_flushall();
+					 				gets(centinela);
+					 				strupr(centinela);
+					 			
+					 				if(strcmp(centinela, "SI") == 0)
+					 				{
+										fseek(arch_profesionales, 2, SEEK_END);
+										
+										fwrite(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+										
+										system("cls");
+										printf("Se ha cargado el socio existosamente...");
+										printf("\n\n");
+										system("pause");
+										
+										// -------- REVALORIZACION DE VARIABLES A UN VALOR NULO -------- 
+										
+											for(int i=0; i<strlen(id); i++)
+												id[i] = NULL;
+						
+											for(int i=0; i<strlen(apeYNom); i++)
+												apeYNom[i] = NULL;
+												
+											for(int i=0; i<strlen(dni); i++)
+												dni[i] = NULL;
+		
+											for(int i=0; i<strlen(telefono); i++)
+												telefono[i] = NULL;													
+																													
+											band_id = NULL;																					 
+											band_apeYNom = NULL;
+											band_dni = NULL;
+											band_telefono = NULL;
+											
+											// Esto se hace porque al retornar hacia el switch principal, los campos quedan con los datos anteriormente cargados.
+											
+										// -------------------------------------------------------------				 				
+									}
+									else if(strcmp(centinela, "NO") == 0)
+									{
+										system("cls");
+										printf("No se ha cargado el socio.");
+										printf("\n\n");
+										system("pause");
+										
+										// -------- REVALORIZACION DE VARIABLES A UN VALOR NULO -------- 
+										
+											for(int i=0; i<strlen(id); i++)
+												id[i] = NULL;
+						
+											for(int i=0; i<strlen(apeYNom); i++)
+												apeYNom[i] = NULL;
+												
+											for(int i=0; i<strlen(dni); i++)
+												dni[i] = NULL;
+		
+											for(int i=0; i<strlen(telefono); i++)
+												telefono[i] = NULL;													
+																													
+											band_id = NULL;																					 
+											band_apeYNom = NULL;
+											band_dni = NULL;
+											band_telefono = NULL;
+											
+											// Esto se hace porque al retornar hacia el switch principal, los campos quedan con los datos anteriormente cargados.
+											
+										// -------------------------------------------------------------			 														
+									}
+									else if(strcmp(centinela, "SI") != 0 && strcmp(centinela, "NO") != 0)
+									{
+										system("cls");
+										printf("Valor incorrecto. Ingrese nuevamente...");
+										printf("\n\n");
+										system("pause");
+									}		
+								}
+								while(strcmp(centinela, "SI") != 0 && strcmp(centinela, "NO") != 0);
+								
+							}
+							else
+							{
+								system("cls");
+								printf("No es posible cargar el socio. Hay campos incompletos.");
+								printf("\n\n");
+								system("pause");
+							}
+							
+							break;
+						 }
+				case '3':
+						 {
+						 	fclose(arch_profesionales);
+							Salir();
+						 }
+				case '0':
+						 {
+						 	fclose(arch_profesionales);
+						 	Modulo_Socios_Profesionales();
+							break;
+						 }
+				default:
+						 {
+						 	system("cls");
+						 	printf("Opcion incorrecta. Ingrese nuevamente...");
+						 	printf("\n\n");
+						 	system("pause");
+							break;
+						 }	
+						 				 					 					 				 	
+			} // cierre switch
+		} 
+		while(true);			
+	}
+		
 }
 
 void Modulo_Prestamos_Libros_Nuevo_Socios()
@@ -4916,7 +5335,7 @@ void Modulo_Prestamos_Objetos_Listar()
 
 void Modulo_Prestamos_Objetos_Nuevo()
 {
-	int opcion = 0;
+	char opcion = NULL;
 	
 	do
 	{
@@ -4926,29 +5345,28 @@ void Modulo_Prestamos_Objetos_Nuevo()
 		printf("\n\n\t1- PRESTAMO PARTICULAR");
 		printf("\n\t2- PRESTAMO PARA SOCIO");
 		
-		printf("\n\n\t3- VOLVER(MODULO PRESTAMOS/OBJETOS)");
-		printf("\n\t4- CERRAR APLICACION");
+		printf("\n\n\t3- CERRAR APLICACION");
 		
 		printf("\n\nSELECCIONE UNA OPCION: ");
-		scanf("%d", &opcion);
+		opcion = Comprobacion_Tecla_Escape();
 		
 		switch(opcion)
 		{
-			case 1:
+			case '1':
 					{
 						Modulo_Prestamos_Objetos_Nuevo_Particular();
 						break;	
 					}
-			case 2:
+			case '2':
 					{
 						Modulo_Prestamos_Objetos_Nuevo_Socios();
 						break;
 					}
-			case 3:
+			case '0':
 					{
 						Modulo_Prestamos_Libros();		
 					}
-			case 4:
+			case '4':
 					{
 						Salir();
 					}									
@@ -4964,12 +5382,12 @@ void Modulo_Prestamos_Objetos_Nuevo()
 		}	
 		
 	}
-	while(opcion >= 1 || opcion <= 3);	
+	while(true);	
 }
 
 void Modulo_Prestamos_Objetos_Editar()
 {
-	int opcion = 0;
+	char opcion = NULL;
 	
 	system("cls");
 	printf("INGRESE EL CODIGO DEL PRESTAMO: ");
@@ -4986,39 +5404,38 @@ void Modulo_Prestamos_Objetos_Editar()
 		
 		printf("\n\n\t5- GUARDAR PRESTAMO");
 		
-		printf("\n\n\t6- VOLVER(MODULO PRESTAMOS/OBJETOS)");
-		printf("\n\t7- CERRAR APLICACION");
+		printf("\n\n\t6- CERRAR APLICACION");
 		
 		printf("\n\nSELECCIONE UNA OPCION: ");
-		scanf("%d", &opcion);
+		opcion = Comprobacion_Tecla_Escape();
 		
 		switch(opcion)
 		{
-			case 1:
+			case '1':
 					{
 						break;	
 					}
-			case 2:
+			case '2':
 					{
 						break;
 					}
-			case 3:
+			case '3':
 					{
 						break;
 					}
-			case 4:
+			case '4':
 					{
 						break;
 					}	
-			case 5:
+			case '5':
 					{
 						break;
 					}
-			case 6:
+			case '0':
 					{
 						Modulo_Prestamos_Libros();	
 					}
-			case 7:
+			case '6':
 					{
 						Salir();
 					}																							
@@ -5034,7 +5451,7 @@ void Modulo_Prestamos_Objetos_Editar()
 		}	
 		
 	}
-	while(opcion >= 1 || opcion <= 6);	
+	while(true);	
 }
 
 void Modulo_Prestamos_Objetos_Completar()
@@ -5056,7 +5473,7 @@ void Modulo_Prestamos_Objetos_Buscar()
 
 void Modulo_Prestamos_Objetos_Nuevo_Particular()
 {
-	
+		
 }
 
 void Modulo_Prestamos_Objetos_Nuevo_Socios()
