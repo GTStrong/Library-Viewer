@@ -35,7 +35,7 @@ typedef char string[81];
 		
 		bool borrado;
 	};
-	
+		
 	struct Libros
 	{
 		int existencias;
@@ -61,11 +61,14 @@ typedef char string[81];
 	
 	struct Prestamos_Libros
 	{
-		int codigo;
 		int cantidad;
 		
-		string titulo;
-		string prestatario;
+		string codigo;
+		string cod_libro;
+		string idprestatario;
+		string apeYNom;
+		string dni;
+		string telefono;
 		
 		Fecha fecha;
 		
@@ -74,14 +77,16 @@ typedef char string[81];
 	
 	struct Prestamos_Objetos
 	{
-		int codigo;
+		int cantidad;
 		
-		string titulo;
-		string prestatario;
-		string cantidad;
-		
+		string codigo;
+		string objeto;
+		string idprestatario;
+		string apeYNom;
+		string dni;
+		string telefono;
 		Fecha fecha;
-		
+	
 		bool borrado;	
 };
 
@@ -4852,13 +4857,13 @@ void Modulo_Prestamos_Objetos()
 		
 		printf("\n\n\t1- LISTAR PRESTAMOS");
 		
-		printf("\n\n\t1- NUEVO PRESTAMO");
+		printf("\n\n\t2- NUEVO PRESTAMO");
 		
-		printf("\n\t2- EDITAR PRESTAMO");
-		printf("\n\t3- COMPLETAR PRESTAMO");
-		printf("\n\t4- BUSCAR PRESTAMO");
+		printf("\n\t3- EDITAR PRESTAMO");
+		printf("\n\t4- COMPLETAR PRESTAMO");
+		printf("\n\t5- BUSCAR PRESTAMO");
 		
-		printf("\n\n\t5- CERRAR APLICACION");
+		printf("\n\n\t6- CERRAR APLICACION");
 		
 		printf("\n\nSELECCIONE UNA OPCION: ");
 		opcion = Comprobacion_Tecla_Escape();
@@ -5060,266 +5065,7 @@ void Modulo_Prestamos_Libros_Buscar()
 
 void Modulo_Prestamos_Libros_Nuevo_Particular()
 {
-	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
-	
-	FILE *arch_prestamos_l;
-	
-	arch_prestamos_l = fopen("Prestamos_L.dat", "a+b");
-	
-	if(arch_prestamos_l == NULL)
-	{
-		system("cls");
-		printf("ERROR. No se pudo crear el archivo Prestamos_L.dat");
-		printf("\n\n");
-		system("pause");	
-	}	
-	
-	// ----------------------------------------------------------
-	
-	else
-	{	
-		Prestamos_Libros Reg_Prestamos_L;
-		
-		char opcion = NULL; // variable centinela para switch principal.
-	
-		string centinela = {NULL}; // variable centinela para SI|NO en la carga del archivo.
-		string centinela_PoE = {NULL};
-		string id = {NULL};
-		string apeYNom = {NULL}; 
-		string dni = {NULL};
-		string telefono = {NULL};
-			
-		bool band_id = NULL;
-		bool band_apeYNom = NULL;
-		bool band_dni = NULL;	
-		bool band_telefono = NULL;
-		
-		do
-		{
-			opcion = NULL;
-			
-			system("cls");
-			
-			printf("-- MODULO DE PRESTAMOS/ESTUDIANTES/NUEVO PRESTAMO --");
-			
-			printf("\n\n\t1- INGRESAR PRESTAMO");
-			printf("\n\t2- GUARDAR PRESTAMO");
-			
-			printf("\n\n\t3- CERRAR APLICACION");
-	
-			printf("\n\nSELECCIONE UNA OPCION: ");
-			opcion = Comprobacion_Tecla_Escape();
-		
-			switch( opcion )
-			{
-				case '1':
-						{
-							system("cls");
-							
-							// ------------------------------ CARGA DE LOS DATOS ------------------------------
-								
-								printf("-- CARGA DE DATOS DEL NUEVO PRESTAMO --");
-							 	printf("\n\n(Si desea cancelar, escriba 'salir')");
-							 	
-							 	printf("\n\nES PROFESIONAL(SI|NO): ");
-							 	_flushall();
-							 	gets(centinela_PoE);
-							 	
-							 	printf("\n\n\tINGRESE ID DE SOCIO: ");
-								_flushall();
-								gets(id);
-									if(strcmp(id, "salir") == 0)
-									{
-										for(int i=0; i<strlen(id); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
-											id[i] = NULL;
-					
-										break; // Salida del "case 1".									
-									}
-																					
-								printf("\tDNI: ");
-								_flushall();
-								gets(dni);
-									if(strcmp(dni, "salir") == 0)
-									{
-										for(int i=0; i<strlen(dni); i++)
-											dni[i] = NULL;
-																				
-										break;										
-									}														
-									
-								printf("\tTELEFONO: ");
-								_flushall();
-								gets(telefono);
-									if(strcmp(telefono, "salir") == 0)
-									{
-										for(int i=0; i<strlen(telefono); i++)
-											telefono[i] = NULL;
-																			
-										break;										
-									}
 
-							// --------------------------------------------------------------------------------
-							
-							break;
-						 }
-				case '2':
-						{	
-							// ------------------------------ COMPROBACIÓN DE CAMPOS VACIOS ------------------------------	
-										 				 	
-								if(strlen(id) != 0)
-						 		{
-						 			strcpy(Reg_Profesionales.id, id);
-									band_id = true;						 			
-								}
-		
-						 		if(strlen(apeYNom) != 0)
-						 		{
-						 			strcpy(Reg_Profesionales.apeYNom, apeYNom);		
-									band_apeYNom = true;				 			
-								}
-	
-							 	if(strlen(dni) != 0)
-						 		{
-						 			strcpy(Reg_Profesionales.dni, dni);
-									band_dni = true;						 				
-								}
-								
-						 		if(strlen(telefono) != 0)
-						 		{
-						 			strcpy(Reg_Profesionales.telefono, telefono);	
-									band_telefono = true;						 			
-								}
-							
-							// -------------------------------------------------------------------------------------------
-							
-							if(band_id == true && band_apeYNom == true && band_telefono == true && band_dni == true)
-							{	
-														 	
-							 	do
-							 	{
-									system("cls");
-								 	printf("DATOS INGRESADOS: ");
-								 	
-								 	printf("\n\n\tID: %s", id);
-								 	printf("\n\tApellido y nombre: %s", apeYNom);
-								 	printf("\n\tDNI: %s", dni);
-								 	printf("\n\tTelefono: %s", telefono);
-								 	
-									printf("\n\nDESEA CARGAR EL SOCIO EN LA BASE DE DATOS(SI|NO): ");
-					 				_flushall();
-					 				gets(centinela);
-					 				strupr(centinela);
-					 			
-					 				if(strcmp(centinela, "SI") == 0)
-					 				{
-										fseek(arch_profesionales, 2, SEEK_END);
-										
-										fwrite(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
-										
-										system("cls");
-										printf("Se ha cargado el socio existosamente...");
-										printf("\n\n");
-										system("pause");
-										
-										// -------- REVALORIZACION DE VARIABLES A UN VALOR NULO -------- 
-										
-											for(int i=0; i<strlen(id); i++)
-												id[i] = NULL;
-						
-											for(int i=0; i<strlen(apeYNom); i++)
-												apeYNom[i] = NULL;
-												
-											for(int i=0; i<strlen(dni); i++)
-												dni[i] = NULL;
-		
-											for(int i=0; i<strlen(telefono); i++)
-												telefono[i] = NULL;													
-																													
-											band_id = NULL;																					 
-											band_apeYNom = NULL;
-											band_dni = NULL;
-											band_telefono = NULL;
-											
-											// Esto se hace porque al retornar hacia el switch principal, los campos quedan con los datos anteriormente cargados.
-											
-										// -------------------------------------------------------------				 				
-									}
-									else if(strcmp(centinela, "NO") == 0)
-									{
-										system("cls");
-										printf("No se ha cargado el socio.");
-										printf("\n\n");
-										system("pause");
-										
-										// -------- REVALORIZACION DE VARIABLES A UN VALOR NULO -------- 
-										
-											for(int i=0; i<strlen(id); i++)
-												id[i] = NULL;
-						
-											for(int i=0; i<strlen(apeYNom); i++)
-												apeYNom[i] = NULL;
-												
-											for(int i=0; i<strlen(dni); i++)
-												dni[i] = NULL;
-		
-											for(int i=0; i<strlen(telefono); i++)
-												telefono[i] = NULL;													
-																													
-											band_id = NULL;																					 
-											band_apeYNom = NULL;
-											band_dni = NULL;
-											band_telefono = NULL;
-											
-											// Esto se hace porque al retornar hacia el switch principal, los campos quedan con los datos anteriormente cargados.
-											
-										// -------------------------------------------------------------			 														
-									}
-									else if(strcmp(centinela, "SI") != 0 && strcmp(centinela, "NO") != 0)
-									{
-										system("cls");
-										printf("Valor incorrecto. Ingrese nuevamente...");
-										printf("\n\n");
-										system("pause");
-									}		
-								}
-								while(strcmp(centinela, "SI") != 0 && strcmp(centinela, "NO") != 0);
-								
-							}
-							else
-							{
-								system("cls");
-								printf("No es posible cargar el socio. Hay campos incompletos.");
-								printf("\n\n");
-								system("pause");
-							}
-							
-							break;
-						 }
-				case '3':
-						 {
-						 	fclose(arch_profesionales);
-							Salir();
-						 }
-				case '0':
-						 {
-						 	fclose(arch_profesionales);
-						 	Modulo_Socios_Profesionales();
-							break;
-						 }
-				default:
-						 {
-						 	system("cls");
-						 	printf("Opcion incorrecta. Ingrese nuevamente...");
-						 	printf("\n\n");
-						 	system("pause");
-							break;
-						 }	
-						 				 					 					 				 	
-			} // cierre switch
-		} 
-		while(true);			
-	}
-		
 }
 
 void Modulo_Prestamos_Libros_Nuevo_Socios()
@@ -5330,7 +5076,7 @@ void Modulo_Prestamos_Libros_Nuevo_Socios()
 
 void Modulo_Prestamos_Objetos_Listar()
 {
-	
+
 }
 
 void Modulo_Prestamos_Objetos_Nuevo()
@@ -5467,13 +5213,877 @@ void Modulo_Prestamos_Objetos_Completar()
 
 void Modulo_Prestamos_Objetos_Buscar()
 {
+	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
+	
+		FILE *arch_prestamos_o;
+		FILE *arch_objetos;
 		
+		arch_prestamos_o = fopen("Prestamos_O.dat", "rb");
+		arch_objetos = fopen("Objetos.dat", "rb");
+			
+		if(arch_prestamos_o == NULL)
+		{
+			system("cls");
+			printf("ERROR. No se pudo abrir el archivo 'Prestamos_O.dat'");
+			printf("\n\n(No hay ningun prestamo en la base de datos)");
+			printf("\n\n");
+		}
+		
+	// ----------------------------------------------------------
+	
+	else
+	{
+		system("cls");
+		
+		char opcion = NULL;
+			
+		Prestamos_Objetos Reg_Prestamos_O;
+		Objetos Reg_Objetos;
+				
+		int i = 0;		
+		bool bandera = false;
+		
+		string codPrestamo = {NULL};
+		string codObjeto = {NULL};
+		string id = {NULL};
+		
+		bool encontrado = true;
+		
+		do
+		{
+			opcion = NULL;
+			
+			system("cls");
+			printf("-- BUSQUEDA DE UN PRESTAMO -- ");
+			printf("\n\n\t1- BUSQUEDA POR CODIGO DE PRESTAMO");
+			printf("\n\t2- BUSQUEDA POR CODIGO DE OBJETO");
+			printf("\n\t3- BUSQUEDA POR ID DE PRESTATARIO");
+			
+			printf("\n\nSELECCIONE UNA OPCION: ");
+			opcion = Comprobacion_Tecla_Escape();
+			
+			switch( opcion )
+			{
+				case '1':
+						{
+							encontrado = NULL;
+							
+							system("cls");
+							printf("INGRESE CODIGO DE PRESTAMO: ");
+							_flushall();
+							gets(codPrestamo);
+							
+							rewind(arch_prestamos_o);
+							fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+							
+							while(!feof(arch_prestamos_o) && encontrado == false)
+							{
+								if(strcmp(codPrestamo, Reg_Prestamos_O.codigo) == 0)
+								{
+									encontrado = true;
+									break;
+								}
+								
+								if(encontrado == false)
+									fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+							}
+							
+							if(encontrado == false)
+							{
+								system("cls");
+								printf("No se encontro el codigo del prestamo ingresado.");
+								printf("\n\n");
+								system("pause");
+																	
+								fclose(arch_prestamos_o);
+								Modulo_Prestamos_Objetos();
+							}
+							else
+							{
+									system("cls");
+									printf("Se ha encontrado el prestamo exitosamente...");
+									printf("\n\n\tCodigo de prestamo: %s", Reg_Prestamos_O.codigo);
+									printf("\n\tObjeto: %s", Reg_Prestamos_O.objeto);
+									printf("\n\tCantidad: %d", Reg_Prestamos_O.cantidad);
+									printf("\n\tID Prestatario: %s", Reg_Prestamos_O.idprestatario);
+									printf("\n\tApellido y nombre: %s", Reg_Prestamos_O.apeYNom);
+									//printf("\n\tFecha del prestamo: %d/%d/%d", dd, mm, aaaa);
+									
+									printf("\n\n");
+									system("pause");
+							}
+								
+							break;
+						}
+				case '2':
+						{
+							i = 0;
+							
+							encontrado = NULL;
+							
+							system("cls");
+							printf("INGRESE CODIGO DEL OBJETO: ");
+							_flushall();
+							gets(codObjeto);
+							
+							rewind(arch_prestamos_o);
+							rewind(arch_objetos);
+							
+							fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+							fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+							
+							system("cls");
+							while(!feof(arch_prestamos_o))
+							{
+								if(strcmp(codObjeto, Reg_Objetos.codigo) == 0)
+								{
+									if(strcmp(Reg_Objetos.nombre, Reg_Prestamos_O.objeto) == 0)
+									{
+										encontrado = true;
+									
+										printf("PRESTAMO [%d]:", i+1);
+										printf("\n\tCodigo de prestamo: %s", Reg_Prestamos_O.codigo);
+										printf("\n\tObjeto: %s", Reg_Prestamos_O.objeto);
+										printf("\n\tCantidad: %d", Reg_Prestamos_O.cantidad);
+										printf("\n\tID Prestatario: %s", Reg_Prestamos_O.idprestatario);
+										printf("\n\tApellido y nombre: %s", Reg_Prestamos_O.apeYNom);
+										//printf("\n\tFecha del prestamo: %d/%d/%d", dd, mm, aaaa);
+									
+										printf("\n\n");	
+									}
+									
+								}
+								
+								fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+								fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);	
+							}
+							
+							if(encontrado == false)
+							{
+								system("cls");
+								printf("No se encontro el codigo del prestamo ingresado.");
+								printf("\n\n");
+								system("pause");
+																	
+								fclose(arch_prestamos_o);
+								Modulo_Prestamos_Objetos();
+							}	
+							
+							system("pause");
+							break;
+						}
+				case '3':
+						{
+							i = 0;
+							
+							encontrado = NULL;
+							
+							system("cls");
+							printf("INGRESE ID DEL PRESTATARIO: ");
+							_flushall();
+							gets(id);
+							
+							rewind(arch_prestamos_o);
+							fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+							
+							system("cls");
+							while(!feof(arch_prestamos_o))
+							{
+								if(strcmp(id, Reg_Prestamos_O.idprestatario) == 0)
+								{
+										encontrado = true;
+									
+										printf("PRESTAMO [%d]:", i+1);
+										printf("\n\tCodigo de prestamo: %s", Reg_Prestamos_O.codigo);
+										printf("\n\tObjeto: %s", Reg_Prestamos_O.objeto);
+										printf("\n\tCantidad: %d", Reg_Prestamos_O.cantidad);
+										printf("\n\tID Prestatario: %s", Reg_Prestamos_O.idprestatario);
+										printf("\n\tApellido y nombre: %s", Reg_Prestamos_O.apeYNom);
+										//printf("\n\tFecha del prestamo: %d/%d/%d", dd, mm, aaaa);
+									
+										printf("\n\n");								
+								}
+								
+								fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+							}
+							
+							if(encontrado == false)
+							{
+								system("cls");
+								printf("No se encontro el id del prestatario ingresado.");
+								printf("\n\n");
+								system("pause");
+																	
+								fclose(arch_prestamos_o);
+								Modulo_Prestamos_Objetos();
+							}	
+							
+							system("pause");
+							break;
+						}
+				case '0':
+						{
+							fclose(arch_prestamos_o);
+							Modulo_Prestamos_Objetos();
+							
+							break;
+						}
+				default:
+						{
+							system("cls");
+							printf("Opcion incorrecta. Ingrese nuevamente...");
+							printf("\n\n");
+							system("pause");
+							system("cls");
+							break;
+						}																				
+			} // Cierre switch principal
+		}
+		while(true);
+		
+		
+		fclose(arch_prestamos_o);
+		system("pause");
+	}				
 }
 
 
 void Modulo_Prestamos_Objetos_Nuevo_Particular()
 {
+	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
+	
+	FILE *arch_prestamos_o;
+	FILE *arch_objetos;
+	FILE *arch_profesionales;
+	FILE *arch_estudiantes;
+	
+	arch_prestamos_o = fopen("Prestamos_O.dat", "a+b");
+	arch_objetos = fopen("Objetos.dat", "r+b");
+	arch_profesionales = fopen("Profesionales.dat", "r+b");
+	arch_estudiantes = fopen("Estudiantes.dat", "r+b");
+	
+	if(arch_prestamos_o == NULL)
+	{
+		system("cls");
+		printf("ERROR. No se pudo crear el archivo Prestamos_O.dat");
+		printf("\n\n");
+		system("pause");	
+	}
+	else if(arch_objetos == NULL)
+	{
+		system("cls");
+		printf("ERROR. El archivo 'Objetos.dat' no existe.");
+		printf("\n\n(Tiene que cargar al menos un objeto).");
+		printf("\n\n");
+		system("pause");
+	}
+	else if(arch_profesionales == NULL)
+	{
+		system("cls");
+		printf("ERROR. El archivo 'Profesionales.dat' no existe.");
+		printf("\n\n(Tiene que cargar al menos un socio profesional).");
+		printf("\n\n");
+		system("pause");
+	}
+	else if(arch_estudiantes == NULL)
+	{
+		system("cls");
+		printf("ERROR. El archivo 'Estudiantes.dat' no existe.");
+		printf("\n\n(Tiene que cargar al menos un socio estudiante).");
+		printf("\n\n");
+		system("pause");
+	}		
+	
+	// ----------------------------------------------------------
+	
+	else
+	{	
+		Prestamos_Objetos Reg_Prestamos_O;
+		Objetos Reg_Objetos;
+		Profesionales Reg_Profesionales;
+		Estudiantes Reg_Estudiantes;
 		
+		char opcion = NULL; // variable centinela para switch principal.
+	
+		int cantidad = NULL;
+		int nuevaCantidad = NULL;
+		
+		string centinela = {NULL};
+		string codigo = {NULL}; 
+		string objeto = {NULL};
+		string id = {NULL};
+		string apeYNom = {NULL}; 
+		string dni = {NULL};
+		string telefono = {NULL};
+		string dd, mm, aaaa = {NULL};
+			
+		bool band_codigo = NULL;
+		bool band_objeto = NULL;
+		bool band_cantidad = NULL;
+		bool band_id = NULL;
+		bool band_apeYNom = NULL;	
+		bool band_dni = NULL;
+		bool band_telefono = NULL;
+		
+		bool prestamo_existente = NULL;
+		bool objeto_existente = NULL;
+		bool socio_existente = NULL;
+		bool dni_existente = NULL;
+		bool cantidad_incorrecta = NULL;
+		
+		do
+		{
+			opcion = NULL;
+			
+			system("cls");
+			
+			printf("-- MODULO DE PRESTAMOS/ESTUDIANTES/NUEVO PRESTAMO PARTICULAR --");
+			
+			printf("\n\n\t1- INGRESAR PRESTAMO");
+			printf("\n\t2- GUARDAR PRESTAMO");
+			
+			printf("\n\n\t3- CERRAR APLICACION");
+	
+			printf("\n\nSELECCIONE UNA OPCION: ");
+			opcion = Comprobacion_Tecla_Escape();
+		
+			switch( opcion )
+			{
+				case '1':
+					
+						//  ------------------------------------ CARGA DE DATOS ------------------------------------
+							
+						{
+							
+							//  -------------------------------------------- CODIGO DE PRESTAMO --------------------------------------------
+							
+								do
+								{
+									system("cls");
+									
+									prestamo_existente = NULL;
+									printf("-- NUEVO PRESTAMO PARTICULAR --");
+									printf("\n\n(Si desea cancelar, escriba 'salir')");
+					
+									printf("\n\nDATOS DEL PRESTAMO: ");
+										printf("\n\tCODIGO DE PRESTAMO: ");
+										_flushall();
+										gets(codigo);
+										
+										if(strcmp(codigo, "salir") == 0)
+										{
+											for(int i=0; i<strlen(codigo); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+												codigo[i] = NULL;
+											
+										 	fclose(arch_prestamos_o);
+										 	fclose(arch_objetos);
+										 	fclose(arch_profesionales);
+										 	fclose(arch_estudiantes);
+										 	
+											Modulo_Prestamos_Objetos_Nuevo_Particular(); // Salida de la carga de datos.								
+										}
+										
+										//  --------------- COMPROBACION DE EXISTENCIA DEL CODIGO DEL PRESTAMO ---------------
+										
+											rewind(arch_prestamos_o);
+											fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+											
+											while(!feof(arch_prestamos_o) && prestamo_existente == true)
+											{
+												if(strcmp(codigo, Reg_Prestamos_O.codigo))
+												{
+													prestamo_existente = true;
+													break;
+												}
+												
+												if(prestamo_existente == false)
+													fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);			
+											}
+											
+											if(prestamo_existente == true)
+											{
+												system("cls");
+												printf("El codigo del prestamo ya existe. Ingrese nuevamente...");
+												printf("\n\n");
+												system("pause");
+											}
+									} // Cierre do-while del codigo del prestamo
+									while(prestamo_existente == true);
+								
+								//  ----------------------------------------------------------------------------------
+						
+							//  ------------------------------------------------------------------------------------------------------------
+							
+							
+							
+							
+							//  -------------------------------------------- OBJETO A PRESTAR --------------------------------------------
+								
+								do
+								{
+									objeto_existente = NULL;
+									
+									system("cls");
+									printf("-- NUEVO PRESTAMO PARTICULAR --");
+									printf("\n\n(Si desea cancelar, escriba 'salir')");
+					
+									printf("\n\nDATOS DEL PRESTAMO: ");
+									printf("\n\tOBJETO A PRESTAR: ");
+							
+									_flushall();
+									gets(objeto);
+									
+									if(strcmp(objeto, "salir") == 0)
+									{
+										for(int i=0; i<strlen(objeto); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+											objeto[i] = NULL;
+										
+									 	fclose(arch_prestamos_o);
+									 	fclose(arch_objetos);
+									 	fclose(arch_profesionales);
+									 	fclose(arch_estudiantes);
+									 	
+										Modulo_Prestamos_Objetos_Nuevo_Particular(); // Salida de la carga de datos.								
+									}
+									
+									//  --------------- COMPROBACION DE EXISTENCIA DEL OBJETO ---------------
+									
+										rewind(arch_objetos);
+										fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+										
+										while(!feof(arch_objetos) && objeto_existente == false)
+										{
+											if(strcmp(objeto, Reg_Objetos.nombre) == 0)
+											{
+												objeto_existente = true;
+												break;
+											}
+											
+											if(objeto_existente == false)
+												fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);			
+										}
+										
+										if(objeto_existente == false)
+										{
+											system("cls");
+											printf("El objeto ingresado no existe. Ingrese nuevamente...");
+											printf("\n\n");
+											system("pause");
+											system("cls");
+										}
+									}
+									while(objeto_existente == false);
+								
+								//  ---------------------------------------------------------------------
+								
+							//  ----------------------------------------------------------------------------------------------------------
+							
+							
+							
+							
+							//  -------------------------------------------- CANTIDAD A PRESTAR --------------------------------------------
+								
+								do
+								{	
+									cantidad_incorrecta = NULL;
+									
+									system("cls");
+									printf("-- NUEVO PRESTAMO PARTICULAR --");
+									printf("\n\n(Si desea cancelar, escriba 'salir')");
+									printf("\n\nDATOS DEL PRESTAMO: ");
+									printf("\n\tCANTIDAD: ");
+									scanf("%d", &cantidad);
+									
+									//  --------------- COMPROBACION DE CANTIDAD A PRESTAR CORRECTA ---------------
+										
+										nuevaCantidad = Reg_Objetos.existencias - cantidad;
+											
+										if(nuevaCantidad < 0)
+										{
+											cantidad_incorrecta = true;
+											
+											system("cls");
+											printf("La cantidad ingresada es incorrecta. Ingrese nuevamente...");
+											printf("\n\n");
+											system("pause");
+										}
+			
+									}
+									while(cantidad_incorrecta == true);
+								
+								//  ---------------------------------------------------------------------------
+								
+							//  ------------------------------------------------------------------------------------------------------------
+							
+							
+							
+							
+							//  -------------------------------------------- CARGA DE ID DE PRESTATARIO --------------------------------------------
+								
+								do
+								{
+									socio_existente = NULL;
+									
+									system("cls");
+									printf("-- NUEVO PRESTAMO PARTICULAR --");
+									printf("\n\n(Si desea cancelar, escriba 'salir')");
+									printf("\n\nDATOS DEL PRESTATARIO: ");
+									
+										printf("\n\tID DE PRESTATARIO: ");
+										_flushall();
+										gets(id);
+										
+										if(strcmp(id, "salir") == 0)
+										{
+											for(int i=0; i<strlen(id); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+												id[i] = NULL;
+											
+										 	fclose(arch_prestamos_o);
+										 	fclose(arch_objetos);
+										 	fclose(arch_profesionales);
+										 	fclose(arch_estudiantes);
+										 	
+											Modulo_Prestamos_Objetos_Nuevo_Particular(); // Salida de la carga de datos.								
+										}									
+										
+										//  --------------- COMPROBACION DE EXISTENCIA DE ID ---------------
+										
+											rewind(arch_profesionales);
+											rewind(arch_estudiantes);
+											
+											fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											
+											while(!feof(arch_profesionales) && socio_existente == false)
+											{
+												if(strcmp(id, Reg_Profesionales.id) == 0)
+												{
+													socio_existente = true;
+													break;
+												}
+												
+												if(socio_existente == false)
+													fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											}
+											
+											while(!feof(arch_estudiantes) && socio_existente == false)
+											{
+												if(strcmp(id, Reg_Estudiantes.id) == 0)
+												{
+													socio_existente = true;
+													break;
+												}
+												
+												if(socio_existente == false)
+													fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											}
+											
+											if(socio_existente == true)
+											{
+												system("cls");
+												printf("El ID ingresado pertenece a un socio. Ingrese nuevamente...");
+												printf("\n\n");
+												system("pause");
+												system("cls");								
+											}								
+									}
+									while(socio_existente == true);
+								
+									//  ----------------------------------------------------------------
+							
+							//  --------------------------------------------------------------------------------------------------------------------
+								
+								system("cls");
+								printf("-- NUEVO PRESTAMO PARTICULAR --");
+								printf("\n\n(Si desea cancelar, escriba 'salir')");
+								printf("\n\nDATOS DEL PRESTATARIO: ");
+								
+									printf("\n\tAPELLIDO Y NOMBRE: ");
+								_flushall();
+								gets(apeYNom);
+								
+								if(strcmp(apeYNom, "salir") == 0)
+								{
+									for(int i=0; i<strlen(apeYNom); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+										apeYNom[i] = NULL;
+									
+								 	fclose(arch_prestamos_o);
+								 	fclose(arch_objetos);
+								 	fclose(arch_profesionales);
+								 	fclose(arch_estudiantes);
+								 	
+									Modulo_Prestamos_Objetos_Nuevo_Particular(); // Salida de la carga de datos.								
+								}					
+								
+
+							//  -------------------------------------------- CARGA DE DNI DEL PRESTATARIO --------------------------------------------
+								
+								do	
+								{
+									dni_existente = NULL;
+									
+									system("cls");
+									printf("-- NUEVO PRESTAMO PARTICULAR --");
+									printf("\n\n(Si desea cancelar, escriba 'salir')");
+									printf("\n\nDATOS DEL PRESTATARIO: ");
+									
+										printf("\n\tDNI: ");
+									_flushall();
+									gets(dni);
+									
+										if(strcmp(dni, "salir") == 0)
+										{
+											for(int i=0; i<strlen(dni); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+												dni[i] = NULL;
+											
+										 	fclose(arch_prestamos_o);
+										 	fclose(arch_objetos);
+										 	fclose(arch_profesionales);
+										 	fclose(arch_estudiantes);
+										 	
+											Modulo_Prestamos_Objetos_Nuevo_Particular(); // Salida de la carga de datos.								
+										}
+									
+										//  --------------- COMPROBACION DE EXISTENCIA DE DNI ---------------
+										
+											rewind(arch_profesionales);
+											rewind(arch_estudiantes);
+											
+											fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											
+											while(!feof(arch_profesionales) && dni_existente == false)
+											{
+												if(strcmp(dni, Reg_Profesionales.dni) == 0)
+												{
+													dni_existente = true;
+													break;
+												}
+												
+												if(dni_existente == false)
+													fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											}
+											
+											while(!feof(arch_estudiantes) && dni_existente == false)
+											{
+												if(strcmp(dni, Reg_Estudiantes.dni) == 0)
+												{
+													dni_existente = true;
+													break;
+												}
+												
+												if(dni_existente == false)
+													fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											}
+											
+											if(dni_existente == true)
+											{
+												system("cls");
+												printf("El DNI ingresado pertenece a un socio. Ingrese nuevamente...");
+												printf("\n\n");
+												system("pause");
+												system("cls");								
+											}								
+									}
+									while(dni_existente == true);
+								
+								//  -----------------------------------------------------------------
+							
+							//  ----------------------------------------------------------------------------------------------------------------------							
+								
+								system("cls");
+								printf("-- NUEVO PRESTAMO PARTICULAR --");
+								printf("\n\n(Si desea cancelar, escriba 'salir')");
+								printf("\n\nDATOS DEL PRESTATARIO: ");
+								
+									printf("\n\tTELEFONO: ");
+								_flushall();
+								gets(telefono);	
+								
+								if(strcmp(telefono, "salir") == 0)
+								{
+									for(int i=0; i<strlen(telefono); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
+										telefono[i] = NULL;
+									
+								 	fclose(arch_prestamos_o);
+								 	fclose(arch_objetos);
+								 	fclose(arch_profesionales);
+								 	fclose(arch_estudiantes);
+								 	
+									Modulo_Prestamos_Objetos_Nuevo_Particular(); // Salida de la carga de datos.								
+								}
+								
+							break;
+							
+							//  ----------------------------------------------------------------------------------------									
+						}
+				case '2':
+						{
+							
+							// ------ COMPROBACION DE CAMPOS VACIOS ------
+							
+								if(strlen(codigo) != 0)	
+									band_codigo = true;
+										
+								if(strlen(objeto) != 0)	
+									band_objeto = true;
+								
+								if(cantidad != 0)	
+									band_cantidad = true;
+																	
+								if(strlen(id) != 0)	
+									band_id = true;
+																	
+								if(strlen(apeYNom) != 0)	
+									band_apeYNom = true;
+								
+								if(strlen(dni) != 0)
+									band_dni = true;
+																																				
+								if(strlen(telefono) != 0)
+									band_telefono = true;
+								
+							// -------------------------------------------
+								
+							if(band_codigo == true && band_objeto == true && band_cantidad == true && band_id == true && band_apeYNom == true && band_dni == true && band_telefono == true)
+							{
+								do
+								{
+									system("cls");
+									
+									printf("-- DATOS DEL PRESTAMO --");
+									printf("\n\tCodigo de prestamo: %s", codigo);
+									printf("\n\tObjeto: %s", objeto);
+									printf("\n\tCantidad: %d", cantidad);
+									
+									printf("\n\n-- DATOS DEL PRESTATARIO --");
+									printf("\n\tID: %s", id);
+									printf("\n\tApellido y Nombre: %s", apeYNom);
+									printf("\n\tDNI: %s", dni);
+									printf("\n\tTelefono: %s", telefono);
+									
+									printf("\n\nDESEA CARGAR EL PRESTAMO EN LA BASE DE DATOS(SI|NO): ");
+									_flushall();
+									gets(centinela);
+									strupr(centinela);
+								
+									if(strcmp(centinela, "SI") == 0)									
+									{
+										strcpy(Reg_Prestamos_O.codigo, codigo);
+										strcpy(Reg_Prestamos_O.objeto, objeto);	
+										Reg_Prestamos_O.cantidad = cantidad;
+										
+										strcpy(Reg_Prestamos_O.idprestatario, id);
+										strcpy(Reg_Prestamos_O.apeYNom, apeYNom);
+										strcpy(Reg_Prestamos_O.dni, dni);
+										strcpy(Reg_Prestamos_O.telefono, telefono);
+										
+										fseek(arch_prestamos_o, 2, SEEK_END);
+										fwrite(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);	
+										
+										// -------- REVALORIZACION DE VARIABLES A UN VALOR NULO -------- 
+										
+											for(int i=0; i<strlen(codigo); i++)
+												codigo[i] = NULL;
+						
+											for(int i=0; i<strlen(objeto); i++)
+												objeto[i] = NULL;
+						
+											cantidad = NULL;
+						
+											for(int i=0; i<strlen(id); i++)
+												id[i] = NULL;
+						
+											for(int i=0; i<strlen(apeYNom); i++)
+												apeYNom[i] = NULL;
+												
+											for(int i=0; i<strlen(dni); i++)
+												dni[i] = NULL;
+		
+											for(int i=0; i<strlen(telefono); i++)
+												telefono[i] = NULL;													
+											
+											band_codigo = NULL;
+											band_objeto = NULL;
+											band_cantidad = NULL;
+																													
+											band_id = NULL;																					 
+											band_apeYNom = NULL;
+											band_dni = NULL;
+											band_telefono = NULL;
+											
+											// Esto se hace porque al retornar hacia el switch principal, los campos quedan con los datos anteriormente cargados.
+											
+										// -------------------------------------------------------------
+										
+										system("cls");
+										printf("El prestamo ha sido cargado exitosamente...");
+										printf("\n\n");
+										system("pause");
+										system("cls");											
+									}
+									else if(strcmp(centinela, "NO") == 0)
+									{
+										system("cls");
+										printf("No se ha cargado el prestamo...");
+										printf("\n\n");
+										system("pause");
+									}
+									else if(strcmp(centinela, "SI") != 0 && strcmp(centinela, "NO") != 0)
+									{
+										system("cls");
+										printf("Valor incorrecto. Ingrese nuevamente...");
+										printf("\n\n");
+										system("pause");
+										system("cls");
+									}
+							}
+							while(strcmp(centinela, "SI") != 0 && strcmp(centinela, "NO") != 0);
+							
+							break;
+						}
+						else
+						{
+							system("cls");
+							printf("No es posible guardar el prestamo. Hay campos sin completar...");
+							printf("\n\n");
+							system("pause");
+							
+							break;
+						}
+				case '3':
+						{
+						 	fclose(arch_prestamos_o);
+						 	fclose(arch_objetos);
+						 	fclose(arch_profesionales);
+						 	fclose(arch_estudiantes);
+							Salir();
+						}
+				case '0':
+						{
+						 	fclose(arch_prestamos_o);
+						 	fclose(arch_objetos);
+						 	fclose(arch_profesionales);
+						 	fclose(arch_estudiantes);
+						 	Modulo_Prestamos_Objetos();
+							break;
+						}
+				default:
+						{
+						 	system("cls");
+						 	printf("Opcion incorrecta. Ingrese nuevamente...");
+						 	printf("\n\n");
+						 	system("pause");
+							break;
+						}	
+						 				 					 					 				 	
+			} // cierre switch
+		
+		}
+		} 
+		while(true);			
+	}
+				
 }
 
 void Modulo_Prestamos_Objetos_Nuevo_Socios()
