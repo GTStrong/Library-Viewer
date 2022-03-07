@@ -497,6 +497,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 	FILE *arch_libros;
+	FILE *arch_objetos;
 	
 	arch_libros = fopen("Libros.dat", "a+b");
 	
@@ -513,6 +514,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 	else
 	{	
 		Libros Reg_Libros;
+		Objetos Reg_Objetos;
 		
 		int existencias = NULL;
 		
@@ -531,7 +533,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 		bool band_seccion = NULL;
 		bool band_autor = NULL;
 		bool band_existencias = NULL;
-		bool libro_existente = NULL;
+		bool codigo_existente = NULL;
 				
 		do
 		{
@@ -558,7 +560,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 							// ------------------------------ CARGA DE LOS DATOS ------------------------------
 								do
 							 	{	
-							 		libro_existente = false;
+							 		codigo_existente = false;
 							 		
 							 		system("cls");
 									printf("-- CARGA DE DATOS DEL NUEVO LIBRO --");
@@ -581,19 +583,38 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 										rewind(arch_libros);
 										fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 										
-										while(!feof(arch_libros) && libro_existente == false)
+										while(!feof(arch_libros) && codigo_existente == false)
 										{
 											if(strcmp(codigo, Reg_Libros.codigo) == 0)
 											{
-												libro_existente = true;		
+												codigo_existente = true;		
 												break;
 											}
 												
-											if(libro_existente == false)
+											if(codigo_existente == false)
 												fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 										}
 										
-										if(libro_existente == true)
+																				arch_libros = fopen("Libros.dat", "rb");
+										if(arch_objetos != NULL)
+										{
+											rewind(arch_libros);
+											fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);			
+											
+											while(!feof(arch_objetos) && codigo_existente == true)
+											{
+												if(strcmp(codigo, Reg_Objetos.codigo))
+												{
+													codigo_existente = true;
+													break;
+												}
+												
+												if(codigo_existente == false)
+													fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);			
+											}	
+										}
+										
+										if(codigo_existente == true)
 										{
 											system("cls");
 											printf("El codigo ingresado ya existe. Ingrese nuevamente...");
@@ -601,7 +622,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 											system("pause");
 										}	
 									}	
-									while(libro_existente == true);
+									while(codigo_existente == true);
 									
 								// ---------------------------------------------------								 					
 								
@@ -1594,6 +1615,7 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 	FILE *arch_objetos;
+	FILE *arch_libros;
 	
 	arch_objetos = fopen("Objetos.dat", "a+b");
 	
@@ -1610,6 +1632,7 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 	else
 	{	
 		Objetos Reg_Objetos;
+		Libros Reg_Libros;
 		
 		int existencias = NULL;
 		
@@ -1622,7 +1645,7 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 		bool band_codigo = NULL;
 		bool band_nombre = NULL;
 		bool band_existencias = NULL;
-		bool objeto_existente = NULL;
+		bool codigo_existente = NULL;
 		
 		do
 		{
@@ -1649,7 +1672,7 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 							// ------------------------------ CARGA DE LOS DATOS ------------------------------
 								do
 							 	{	
-							 		objeto_existente = false;
+							 		codigo_existente = false;
 							 		
 							 		system("cls");
 									printf("-- CARGA DE DATOS DEL NUEVO OBJETO --");
@@ -1671,19 +1694,39 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 										rewind(arch_objetos);
 										fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 										
-										while(!feof(arch_objetos) && objeto_existente == false)
+										while(!feof(arch_objetos) && codigo_existente == false)
 										{
 											if(strcmp(codigo, Reg_Objetos.codigo) == 0)
 											{
-												objeto_existente = true;		
+												codigo_existente = true;		
 												break;
 											}
 												
-											if(objeto_existente == false)
+											if(codigo_existente == false)
 												fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 										}
 										
-										if(objeto_existente == true)
+																					
+										arch_libros = fopen("Libros.dat", "rb");
+										if(arch_libros != NULL)
+										{
+											rewind(arch_libros);
+											fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);			
+											
+											while(!feof(arch_libros) && codigo_existente == true)
+											{
+												if(strcmp(codigo, Reg_Libros.codigo))
+												{
+													codigo_existente = true;
+													break;
+												}
+												
+												if(codigo_existente == false)
+													fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);			
+											}	
+										}	
+										
+										if(codigo_existente == true)
 										{
 											system("cls");
 											printf("El codigo ingresado ya existe. Ingrese nuevamente...");
@@ -1691,7 +1734,7 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 											system("pause");
 										}	
 									}	
-									while(objeto_existente == true);
+									while(codigo_existente == true);
 									
 								// ---------------------------------------------------
 													
@@ -2723,6 +2766,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 	FILE *arch_estudiantes;
+	FILE *arch_profesionales;
 	
 	arch_estudiantes = fopen("Estudiantes.dat", "a+b");
 	
@@ -2739,6 +2783,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 	else
 	{	
 		Estudiantes Reg_Estudiantes;
+		Profesionales Reg_Profesionales;
 		
 		char opcion = NULL; // variable centinela para switch principal.
 	
@@ -2754,7 +2799,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 		bool band_dni = NULL;
 		bool band_curso = NULL;
 		bool band_turno = NULL;	
-		bool estudiante_existente = NULL;	
+		bool socio_existente = NULL;	
 				
 		do
 		{
@@ -2780,7 +2825,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 							// ------------------------------ CARGA DE LOS DATOS ------------------------------
 							do	
 							{
-								estudiante_existente = NULL;
+								socio_existente = NULL;
 								
 								system("cls");
 								printf("-- CARGA DE DATOS DEL NUEVO SOCIO --");
@@ -2803,27 +2848,48 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 										rewind(arch_estudiantes);
 										fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
 										
-										while(!feof(arch_estudiantes) && estudiante_existente == false)
+										while(!feof(arch_estudiantes) && socio_existente == false)
 										{
 											if(strcmp(id, Reg_Estudiantes.id) == 0)
 											{
-												estudiante_existente = true;		
+												socio_existente = true;		
 												break;
 											}
 												
-											if(estudiante_existente == false)
+											if(socio_existente == false)
 												fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
 										}
+									
 										
-										if(estudiante_existente == true)
+										arch_profesionales = fopen("Profesionales.dat", "rb");
+										
+										if(arch_profesionales != NULL)
+										{
+											rewind(arch_profesionales);
+											fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+										
+											while(!feof(arch_profesionales) && socio_existente == false)
+											{
+												if(strcmp(id, Reg_Profesionales.id) == 0)
+												{
+													socio_existente = true;		
+													break;
+												}
+													
+												if(socio_existente == false)
+													fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											}										
+										}
+									
+										if(socio_existente == true)
 										{
 											system("cls");
-											printf("El ID ingresado ya existe. Ingrese nuevamente...");
+											printf("El ID de socio ingresado ya existe. Ingrese nuevamente...");
 											printf("\n\n");
 											system("pause");
 										}	
 									}	
-									while(estudiante_existente == true);
+									while(socio_existente == true);
 									
 								// ---------------------------------------------------
 					
@@ -3781,6 +3847,7 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 	FILE *arch_profesionales;
+	FILE *arch_estudiantes;
 	
 	arch_profesionales = fopen("Profesionales.dat", "a+b");
 	
@@ -3797,6 +3864,7 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 	else
 	{	
 		Profesionales Reg_Profesionales;
+		Estudiantes Reg_Estudiantes;
 		
 		char opcion = NULL; // variable centinela para switch principal.
 	
@@ -3810,7 +3878,7 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 		bool band_apeYNom = NULL;
 		bool band_dni = NULL;	
 		bool band_telefono = NULL;
-		bool profesional_existente = NULL;
+		bool socio_existente = NULL;
 		
 		do
 		{
@@ -3835,7 +3903,7 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 							do	
 							{
 								// ------------------------------ CARGA DE LOS DATOS ------------------------------
-								profesional_existente = NULL;
+								socio_existente = NULL;
 								
 								system("cls");
 								printf("-- CARGA DE DATOS DEL NUEVO SOCIO --");
@@ -3858,27 +3926,47 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 										rewind(arch_profesionales);
 										fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
 										
-										while(!feof(arch_profesionales) && profesional_existente == false)
+										while(!feof(arch_profesionales) && socio_existente == false)
 										{
 											if(strcmp(id, Reg_Profesionales.id) == 0)
 											{
-												profesional_existente = true;		
+												socio_existente = true;		
 												break;
 											}
 												
-											if(profesional_existente == false)
+											if(socio_existente == false)
 												fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
 										}
 										
-										if(profesional_existente == true)
+										arch_estudiantes = fopen("Estudiantes.dat", "rb");
+										
+										if(arch_estudiantes != NULL)
+										{
+											rewind(arch_estudiantes);
+											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+										
+											while(!feof(arch_estudiantes) && socio_existente == false)
+											{
+												if(strcmp(id, Reg_Estudiantes.id) == 0)
+												{
+													socio_existente = true;		
+													break;
+												}
+													
+												if(socio_existente == false)
+													fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											}										
+										}										
+										
+										if(socio_existente == true)
 										{
 											system("cls");
-											printf("El ID ingresado ya existe. Ingrese nuevamente...");
+											printf("El ID de socio ingresado ya existe. Ingrese nuevamente...");
 											printf("\n\n");
 											system("pause");
 										}	
 									}	
-									while(profesional_existente == true);
+									while(socio_existente == true);
 									
 								// ---------------------------------------------------
 								
@@ -5060,6 +5148,7 @@ void Modulo_Prestamos_Libros_Buscar()
 		
 }
 
+
 void Modulo_Prestamos_Objetos_Listar()
 {
 
@@ -5070,6 +5159,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 	FILE *arch_prestamos_o;
+	FILE *arch_prestamos_l;		
 	FILE *arch_objetos;
 	FILE *arch_profesionales;
 	FILE *arch_estudiantes;
@@ -5116,6 +5206,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 	else
 	{	
 		Prestamos_Objetos Reg_Prestamos_O;
+		Prestamos_Libros Reg_Prestamos_L;
 		Objetos Reg_Objetos;
 		Profesionales Reg_Profesionales;
 		Estudiantes Reg_Estudiantes;
@@ -5221,6 +5312,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 												if(prestamo_existente == false)
 													fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);			
 											}
+													
 											
 											if(prestamo_existente == true)
 											{
