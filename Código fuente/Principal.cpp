@@ -47,6 +47,7 @@ typedef char string[81];
 		string seccion;
 		string autor;
 		
+		bool prestado;
 		bool borrado;
 	};
 	
@@ -57,6 +58,7 @@ typedef char string[81];
 		string codigo;
 		string nombre;
 		
+		bool prestado;
 		bool borrado;
 	};	
 	
@@ -1909,6 +1911,7 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 		FILE *arch_objetos;
+		FILE *arch_prestamos_o;
 		arch_objetos = fopen("Objetos.dat", "r+b");
 		
 		if(arch_objetos == NULL)
@@ -1925,20 +1928,22 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 	else
 	{
 		Objetos Reg_Objetos;
+		Prestamos_Objetos Reg_Prestamos_O;
 		
 		char opcion = NULL;
-		int existencias = 0;
-		int posicion = 0;
+		int existencias = NULL;
+		int posicion = NULL;
 		
 		string target = {NULL};
 		string codigo = {NULL};
 		string nombre = {NULL};
 		string auxiliar = {NULL};							
 		
-		bool bandera = false;
-		bool band_codigo = false;
-		bool band_nombre = false;
-		bool band_existencias = false;
+		bool bandera = NULL;
+		bool band_codigo = NULL;
+		bool band_nombre = NULL;
+		bool band_existencias = NULL;
+		bool objeto_encontrado = NULL;
 		
 		// ------------ BUSQUEDA DEL CODIGO DEL OBJETO EN EL ARCHIVO ------------
 		
@@ -2074,9 +2079,10 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 									{
 										// ------ CARGA DE DATOS EN EL REGISTRO ------
 										
-											band_codigo = false;
-											band_nombre = false;
-											band_existencias = false;
+											band_codigo = NULL;
+											band_nombre = NULL;
+											band_existencias = NULL;
+											objeto_encontrado = NULL;
 											
 											if( strlen(codigo) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
 											{
@@ -2115,6 +2121,31 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 													nombre[i] = NULL;
 												
 												existencias = 0;
+												
+												// -------------- EDICION DEL NOMBRE DE OBJETO EN ARCHIVO DE PRESTAMOS --------------
+												
+													arch_prestamos_o = fopen("Prestamos_O", "r+b");
+													
+													if(arch_prestamos_o != NULL)
+													{
+														rewind(arch_prestamos_o);
+														fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+														
+														while(!feof(arch_prestamos_o) && objeto_encontrado == false)
+														{
+															if(strcmp(nombre, Reg_Prestamos_O.objeto) == 0)
+															{
+																objeto_encontrado = true;
+																break;	
+															}
+															
+															if(objeto_encontrado == false)
+																fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+			
+														}	
+													}
+													
+												// ----------------------------------------------------------------------------------
 											}
 											else
 											{
@@ -2273,10 +2304,15 @@ void Modulo_Biblioteca_Objetos_EliminarObjeto()
 		string target = {NULL};
 		string centinela = {NULL};	
 		
-		bool bandera = false;
+		bool bandera = NULL;
+		bool band_prestado = NULL;
 		
 		// ------------ BUSQUEDA DEL CODIGO DEL LIBRO EN EL ARCHIVO ------------
-	
+		do
+		{
+			bandera = NULL;
+			band_prestado = NULL;
+			
 			system("cls");
 			printf("-- BORRADO DE UN OBJETO --");
 			printf("\n\n(Si desea cancelar, escriba 'salir')");	
@@ -2290,95 +2326,112 @@ void Modulo_Biblioteca_Objetos_EliminarObjeto()
 				Modulo_Biblioteca_Objetos();
 			}	
 			
-			bandera = false;
+			bandera = NULL;
 			rewind(arch_objetos);
 			fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 			
 			while(!feof(arch_objetos) && bandera == false)
 			{
-				if( strcmp(target, Reg_Objetos.codigo) == 0 && Reg_Objetos.borrado == false )
+				if( strcmp(target, Reg_Objetos.codigo) == 0 && Reg_Objetos.prestado == true)
+				{
+					band_prestado = true;
+					break;
+				}
+				
+				if( strcmp(target, Reg_Objetos.codigo) == 0 && Reg_Objetos.prestado == false)
 				{
 					fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
 					bandera = true;	
-				}
+					break;
+				}					
 
-	
 				if (bandera == false)
 					fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);	
 			}
-		
-		// ---------------------------------------------------------------------	
 			
-			if(bandera == true)
+			if(band_prestado == true)
 			{
-				do
+				system("cls");
+				printf("El objeto ingresado se encuentra en prestamo.");
+				printf("\n\n");
+				system("pause");
+			}
+			
+			if(bandera == false && band_prestado == false)
+			{
+				system("cls");
+				printf("No se encontro el codigo del objeto ingresado...");
+				printf("\n\n");
+				system("pause");
+			}			
+		}
+		while(band_prestado == true || bandera == false);
+
+		// ---------------------------------------------------------------------	
+			do
+			{
+				system("cls");
+				printf("DESEA ELIMINAR EL OBJETO(SI|NO): ");
+				_flushall();
+				gets(centinela);
+				
+				if( strcmp((strupr(centinela)), "SI") == 0) // Cadena ingresada se convierte a mayusculas, y se compara con la cadena "SI"
 				{
-					system("cls");
-					printf("DESEA ELIMINAR EL OBJETO(SI|NO): ");
-					_flushall();
-					gets(centinela);
+					Reg_Objetos.borrado = true;
+					fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 					
-					if( strcmp((strupr(centinela)), "SI") == 0) // Cadena ingresada se convierte a mayusculas, y se compara con la cadena "SI"
-					{
-						Reg_Objetos.borrado = true;
-						fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+					// ---------------------------- BAJA FISICA DEL ARCHIVO ------------------------------
+						FILE *aux;
+						aux = fopen("auxiliar.dat", "w+b");
 						
-						// ---------------------------- BAJA FISICA DEL ARCHIVO ------------------------------
-							FILE *aux;
-							aux = fopen("auxiliar.dat", "w+b");
-							
-							rewind(arch_objetos);
-							fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
-							
-							while (!feof(arch_objetos))
+						rewind(arch_objetos);
+						fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+						
+						while (!feof(arch_objetos))
+						{
+							if (Reg_Objetos.borrado == false)
 							{
-								if (Reg_Objetos.borrado == false)
-								{
-									fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, aux);
-									
-									bandera = true;
-								}
+								fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, aux);
 								
-								fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+								bandera = true;
 							}
 							
-							if (bandera = true)
-							{
-								system("cls");
-								printf("Se ha borrado el objeto exitosamente...");
-								printf("\n\nVolviendo a Biblioteca/Libros...");
-								printf("\n\n");
-								system("pause");
-								system("cls");
-							}
-							else
-							{
-								system("cls");
-								printf("No se pudo borrar el objeto.");
-								printf("\n\n");
-								system("pause");
-							}
-							
-							fclose(arch_objetos);
-							fclose(aux);
-							
-							remove("Objetos.dat");
-							rename("auxiliar.dat", "Objetos.dat");
-							remove("auxiliar.dat");
-							
-						// -----------------------------------------------------------------------------------
+							fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+						}
+						
+						if (bandera = true)
+						{
+							system("cls");
+							printf("Se ha borrado el objeto exitosamente...");
+							printf("\n\n");
+							system("pause");
+							system("cls");
+						}
+						else
+						{
+							system("cls");
+							printf("No se pudo borrar el objeto.");
+							printf("\n\n");
+							system("pause");
+						}
+						
+						fclose(arch_objetos);
+						fclose(aux);
+						
+						remove("Objetos.dat");
+						rename("auxiliar.dat", "Objetos.dat");
+						remove("auxiliar.dat");
+						
+					// -----------------------------------------------------------------------------------
 											
 					}
 					else if( strcmp((strupr(centinela)), "NO") == 0) // Cadena ingresada se convierte a mayusculas, y se compara con la cadena "NO"
 					{
 						system("cls");
 						printf("No se ha borrado el objeto ingresado.");
-						printf("\n\nVolviendo a Biblioteca/Libros...");
 						printf("\n\n");
 						system("pause");
 						system("cls");
-						
-						fclose(arch_objetos);
 					}
 					else if( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) ) // Cadena ingresada es distinta de SI y NO
 					{
@@ -2388,24 +2441,14 @@ void Modulo_Biblioteca_Objetos_EliminarObjeto()
 						system("pause");
 						system("cls");	
 					}
-
-				}
-				while( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) );
-				
-			} // Cierre if de bandera	
-			else
-			{
-				system("cls");
-				printf("No se encontro el codigo del objeto ingresado...");
-				printf("\n\nVolviendo a Biblioteca/Libros...");
-				printf("\n\n");
-				system("pause");
-				system("cls");
-				
-				fclose(arch_objetos);
-				Modulo_Biblioteca_Objetos(); // Retornar a la funcion
+					else if( strcmp((strupr(centinela)), "SALIR") == 0)
+					{
+						fclose(arch_objetos);
+						Modulo_Biblioteca_Objetos();
+					}
 			}
-	
+			while( ((strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0)) );
+					
 	} // Cierre if de archivo	
 }
 
@@ -5879,6 +5922,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 										nuevaCantidad = Reg_Libros.existencias - cantidad;
 										Reg_Libros.existencias = nuevaCantidad;
 										
+										Reg_Libros.prestado = true;
+										
 										fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 										
@@ -6015,10 +6060,11 @@ void Modulo_Prestamos_Libros_Nuevo()
 										nuevaCantidad = Reg_Libros.existencias - cantidad;
 										Reg_Libros.existencias = nuevaCantidad;
 										
+										Reg_Libros.prestado = true;
+										
 										fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
-
-										
+	
 										dd = Fecha_Dia();
 										mm = Fecha_Mes();
 										aaaa = Fecha_Anio();
@@ -6147,6 +6193,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 											
 											nuevaCantidad = Reg_Libros.existencias - cantidad;
 											Reg_Libros.existencias = nuevaCantidad;
+											
+											Reg_Libros.prestado = true;
 											
 											fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 											fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
@@ -6629,8 +6677,8 @@ void Modulo_Prestamos_Libros_Completar()
 	if(arch_prestamos_l == NULL)
 	{
 		system("pause");
-		printf("ERROR: El archivo 'Prestamos_L.dat' no existe");
-		printf("\n\n(Debe registrar al menos un prestamo de libro).");
+		printf("ERROR: El archivo 'Prestamos_O.dat' no existe");
+		printf("\n\n(Debe registrar al menos un prestamo de objeto).");
 		printf("\n\n");
 		system("pause");
 	}
@@ -6641,139 +6689,138 @@ void Modulo_Prestamos_Libros_Completar()
 		Prestamos_Libros Reg_Prestamos_L;
 		
 		string target = {NULL};
-		string centinela = {NULL};	
+		string centinela = {NULL};
+		string cpy_target = {NULL};
+		string cpy_centinela = {NULL};
 		
+		bool band_encontrado = NULL;
 		bool bandera = NULL;
 		
-		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
-		
-		
+		do
+		{
+			band_encontrado = NULL;	
+			
 			system("cls");
 			printf("-- COMPLETAR UN PRESTAMO --");
 			printf("\n\n(Si desea cancelar, escriba 'salir')");	
-			printf("\n\n\tINGRESE EL CODIGO DEL PRESTAMO A COMPLETAR: ");
+			printf("\n\n\tINGRESE EL CODIGO DEL PRESTAMO A COMPLETAR: ");		
 			_flushall();
-			gets(target);	
+			gets(target);
 			
-			if(strcmp(target, "salir") == 0)
+			strcpy(cpy_target, target);
+			
+			if(strcmp(strupr(cpy_target), "SALIR") == 0) 
 			{
 				fclose(arch_prestamos_l);
 				Modulo_Prestamos_Libros();
-			}	
+			}
 			
-			bandera = NULL;
 			rewind(arch_prestamos_l);
 			fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 			
-			while(!feof(arch_prestamos_l) && bandera == false)
+			while(!feof(arch_prestamos_l) && band_encontrado == false)
 			{
-				if( strcmp(target, Reg_Prestamos_L.codigo) == 0 && Reg_Prestamos_L.borrado == false )
+				if(strcmp(target, Reg_Prestamos_L.codigo) == 0)
 				{
-					fseek(arch_prestamos_l, (long)-sizeof(Reg_Prestamos_L), SEEK_CUR);
-					bandera = true;	
+					band_encontrado = true;
+					break;
 				}
 				
-				if (bandera == false)
-					fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);	
+				if( band_encontrado == false )
+					fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 			}
-		
-		// ---------------------------------------------------------------------	
 			
-			if(bandera == true)
-			{
-				do
-				{
-					system("cls");
-					printf("DESEA COMPLETAR EL PRESTAMO(SI|NO): ");
-					_flushall();
-					gets(centinela);
-					
-					if( strcmp((strupr(centinela)), "SI") == 0) // Cadena ingresada se convierte a mayusculas, y se compara con la cadena "SI"
-					{
-						Reg_Prestamos_L.borrado = true;
-						fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-						
-						// ---------------------------- BAJA FISICA DEL ARCHIVO ------------------------------
-							FILE *aux;
-							aux = fopen("auxiliar.dat", "w+b");
-							
-							rewind(arch_prestamos_l);
-							fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-							
-							while (!feof(arch_prestamos_l))
-							{
-								if (Reg_Prestamos_L.borrado == false)
-								{
-									fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, aux);
-									
-									bandera = true;
-								}
-								
-								fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-							}
-							
-							if (bandera = true)
-							{
-								system("cls");
-								printf("Se ha completado el prestamo exitosamente...");
-								printf("\n\n");
-								system("pause");
-								system("cls");
-							}
-							else
-							{
-								system("cls");
-								printf("No se pudo completar el prestamo.");
-								printf("\n\n");
-								system("pause");
-							}
-							
-							fclose(arch_prestamos_l);
-							fclose(aux);
-							
-							remove("Prestamos_O.dat");
-							rename("auxiliar.dat", "Prestamos_L.dat");
-							remove("auxiliar.dat");
-							
-						// -----------------------------------------------------------------------------------
-											
-					}
-					else if( strcmp((strupr(centinela)), "NO") == 0) // Cadena ingresada se convierte a mayusculas, y se compara con la cadena "NO"
-					{
-						system("cls");
-						printf("No se ha completado el prestamo ingresado.");
-						printf("\n\n");
-						system("pause");
-						system("cls");
-						
-						fclose(arch_prestamos_l);
-					}
-					else if( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) ) // Cadena ingresada es distinta de SI y NO
-					{
-						system("cls");
-						printf("Valor incorrecto. Ingrese nuevamente...");
-						printf("\n\n");
-						system("pause");
-						system("cls");	
-					}
-
-				}
-				while( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) );
-				
-			} // Cierre if de bandera	
-			else
+			if( band_encontrado == false )
 			{
 				system("cls");
-				printf("No se encontro el codigo del prestamo ingresado...");
+				printf("No se encontro el codigo del prestamo. Ingrese nuevamente...");
 				printf("\n\n");
 				system("pause");
-				system("cls");
-				
-				fclose(arch_prestamos_l);
-				Modulo_Prestamos_Libros(); // Retornar a la funcion
 			}
-	
-	} // Cierre if de archivo
+			
+		}
+		while(band_encontrado == false);
+		
+		do
+		{
+			system("cls");
+			printf("-- COMPLETAR UN PRESTAMO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tDESEA COMPLETAR EL PRESTAMO(SI|NO): ");
+			_flushall();
+			gets(centinela);
+			
+			strcpy(cpy_centinela, centinela);
+			
+			if(strcmp(strupr(cpy_centinela), "SI") == 0)
+			{
+				bandera = NULL;
+				Reg_Prestamos_L.borrado = true;
+				fseek(arch_prestamos_l, (long)-sizeof(Reg_Prestamos_L), SEEK_CUR);
+				
+				fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
+				
+				// ---------------------------- BAJA FISICA DEL ARCHIVO ------------------------------
+					FILE *aux;
+					aux = fopen("auxiliar.dat", "w+b");
+					
+					rewind(arch_prestamos_l);
+					fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
+					
+					while (!feof(arch_prestamos_l))
+					{
+						if (Reg_Prestamos_L.borrado == false)
+						{	
+							fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, aux);
+							bandera = true;
+						}
+						
+						fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
+					}
+					
+					if (bandera = true)
+					{
+						system("cls");
+						printf("Se ha completado el prestamo exitosamente...");
+						printf("\n\n");
+						system("pause");
+						system("cls");
+					}
+					else
+					{
+						system("cls");
+						printf("No se pudo completar el prestamo.");
+						printf("\n\n");
+						system("pause");
+					}
+					
+					fclose(arch_prestamos_l);
+					fclose(aux);
+					
+					remove("Prestamos_L.dat");
+					rename("auxiliar.dat", "Prestamos_L.dat");
+					remove("auxiliar.dat");
+					
+				// -----------------------------------------------------------------------------------		
+			}
+			else if(strcmp(strupr(cpy_centinela), "NO") == 0)
+			{
+				system("cls");
+				printf("No se ha borrado el prestamo ingresado...");
+				printf("\n\n");
+				system("pause");
+			}
+			else if(strcmp(strupr(cpy_centinela), "NO") != 0 && (strcmp(strupr(cpy_centinela), "SI") != 0))
+			{
+				system("cls");
+				printf("Valor incorrecto. Ingrese nuevamente...");
+				printf("\n\n");
+				system("pause");
+			}
+			
+		}
+		while(strcmp(strupr(cpy_centinela), "NO") != 0 && (strcmp(strupr(cpy_centinela), "SI") != 0));
+	}
 }
 
 void Modulo_Prestamos_Libros_Buscar()
@@ -7373,6 +7420,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 								
 								do
 								{	
+									objeto_existente = NULL;
 									cantidad_incorrecta = NULL;
 									
 									system("cls");
@@ -7384,8 +7432,23 @@ void Modulo_Prestamos_Objetos_Nuevo()
 									
 									//  --------------- COMPROBACION DE CANTIDAD A PRESTAR CORRECTA ---------------
 										
-										nuevaCantidad = Reg_Objetos.existencias - cantidad;
+										rewind(arch_objetos);
+										fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+										
+										while(!feof(arch_objetos) && objeto_existente == false)
+										{
+											if( strcmp(objeto, Reg_Objetos.nombre) == 0 )
+											{
+												objeto_existente = true;
+												break;
+											}
 											
+											if( objeto_existente == false )
+												fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+										}
+										
+										nuevaCantidad = Reg_Objetos.existencias - cantidad;
+										
 										if(nuevaCantidad < 0)
 										{
 											cantidad_incorrecta = true;
@@ -7876,6 +7939,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 										strcpy(Reg_Prestamos_O.objeto, objeto);	
 										Reg_Prestamos_O.cantidad = cantidad;
 										
+										objeto_existente = NULL;
 										rewind(arch_objetos);
 										fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 										
@@ -7884,7 +7948,6 @@ void Modulo_Prestamos_Objetos_Nuevo()
 											if(strcmp(objeto, Reg_Objetos.nombre) == 0)
 											{
 												objeto_existente = true;
-												fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
 												break;
 											}
 											
@@ -7898,6 +7961,8 @@ void Modulo_Prestamos_Objetos_Nuevo()
 										printf("Reg_Objetos.Existencias vale: %d", Reg_Objetos.existencias);
 										printf("\n\n");
 										system("pause");
+										
+										Reg_Objetos.prestado = true;
 										
 										fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
 										fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
@@ -8012,6 +8077,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 										strcpy(Reg_Prestamos_O.dni, dni);
 										strcpy(Reg_Prestamos_O.telefono, telefono);
 										
+										objeto_existente = NULL;
 										rewind(arch_objetos);
 										fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 										
@@ -8020,7 +8086,6 @@ void Modulo_Prestamos_Objetos_Nuevo()
 											if(strcmp(objeto, Reg_Objetos.nombre) == 0)
 											{
 												objeto_existente = true;
-												fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
 												break;
 											}
 											
@@ -8034,6 +8099,8 @@ void Modulo_Prestamos_Objetos_Nuevo()
 										printf("Reg_Objetos.Existencias vale: %d", Reg_Objetos.existencias);
 										printf("\n\n");
 										system("pause");
+										
+										Reg_Objetos.prestado = true;
 										
 										fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
 										fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
@@ -8148,6 +8215,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 											strcpy(Reg_Prestamos_O.dni, dni);
 											strcpy(Reg_Prestamos_O.telefono, telefono);
 											
+											objeto_existente = NULL;
 											rewind(arch_objetos);
 											fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 											
@@ -8169,6 +8237,8 @@ void Modulo_Prestamos_Objetos_Nuevo()
 											printf("Reg_Objetos.Existencias vale: %d", Reg_Objetos.existencias);
 											printf("\n\n");
 											system("pause");
+											
+											Reg_Objetos.prestado = true;
 											
 											fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);												
 											fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);											
@@ -8632,141 +8702,138 @@ void Modulo_Prestamos_Objetos_Completar()
 		Prestamos_Objetos Reg_Prestamos_O;
 		
 		string target = {NULL};
-		string centinela = {NULL};	
+		string centinela = {NULL};
+		string cpy_target = {NULL};
+		string cpy_centinela = {NULL};
 		
+		bool band_encontrado = NULL;
 		bool bandera = NULL;
 		
-		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
-		
-		
+		do
+		{
+			band_encontrado = NULL;	
+			
 			system("cls");
 			printf("-- COMPLETAR UN PRESTAMO --");
 			printf("\n\n(Si desea cancelar, escriba 'salir')");	
-			printf("\n\n\tINGRESE EL CODIGO DEL PRESTAMO A COMPLETAR: ");
+			printf("\n\n\tINGRESE EL CODIGO DEL PRESTAMO A COMPLETAR: ");		
 			_flushall();
-			gets(target);	
+			gets(target);
 			
-			if(strcmp(target, "salir") == 0)
+			strcpy(cpy_target, target);
+			
+			if(strcmp(strupr(cpy_target), "SALIR") == 0) 
 			{
 				fclose(arch_prestamos_o);
 				Modulo_Prestamos_Objetos();
-			}	
+			}
 			
-			bandera = NULL;
 			rewind(arch_prestamos_o);
 			fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
 			
-			while(!feof(arch_prestamos_o) && bandera == false)
+			while(!feof(arch_prestamos_o) && band_encontrado == false)
 			{
-				if( strcmp(target, Reg_Prestamos_O.codigo) == 0 && Reg_Prestamos_O.borrado == false )
+				if(strcmp(target, Reg_Prestamos_O.codigo) == 0)
 				{
-					fseek(arch_prestamos_o, (long)-sizeof(Reg_Prestamos_O), SEEK_CUR);
-					bandera = true;	
+					band_encontrado = true;
+					break;
 				}
 				
-				if (bandera == false)
-					fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);	
+				if( band_encontrado == false )
+					fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
 			}
-		
-		// ---------------------------------------------------------------------	
 			
-			if(bandera == true)
-			{
-				do
-				{
-					system("cls");
-					printf("DESEA COMPLETAR EL PRESTAMO(SI|NO): ");
-					_flushall();
-					gets(centinela);
-					
-					if( strcmp((strupr(centinela)), "SI") == 0) // Cadena ingresada se convierte a mayusculas, y se compara con la cadena "SI"
-					{
-						Reg_Prestamos_O.borrado = true;
-						fwrite(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
-						
-						// ---------------------------- BAJA FISICA DEL ARCHIVO ------------------------------
-							FILE *aux;
-							aux = fopen("auxiliar.dat", "w+b");
-							
-							rewind(arch_prestamos_o);
-							fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
-							
-							while (!feof(arch_prestamos_o))
-							{
-								if (Reg_Prestamos_O.borrado == false)
-								{
-									fwrite(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, aux);
-									
-									bandera = true;
-								}
-								
-								fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
-							}
-							
-							if (bandera = true)
-							{
-								system("cls");
-								printf("Se ha completado el prestamo exitosamente...");
-								printf("\n\nVolviendo a Socios/Estudiantes...");
-								printf("\n\n");
-								system("pause");
-								system("cls");
-							}
-							else
-							{
-								system("cls");
-								printf("No se pudo completar el prestamo.");
-								printf("\n\n");
-								system("pause");
-							}
-							
-							fclose(arch_prestamos_o);
-							fclose(aux);
-							
-							remove("Prestamos_O.dat");
-							rename("auxiliar.dat", "Prestamos_O.dat");
-							remove("auxiliar.dat");
-							
-						// -----------------------------------------------------------------------------------
-											
-					}
-					else if( strcmp((strupr(centinela)), "NO") == 0) // Cadena ingresada se convierte a mayusculas, y se compara con la cadena "NO"
-					{
-						system("cls");
-						printf("No se ha completado el prestamo ingresado.");
-						printf("\n\nVolviendo a Socios/Estudiantes...");
-						printf("\n\n");
-						system("pause");
-						system("cls");
-						
-						fclose(arch_prestamos_o);
-					}
-					else if( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) ) // Cadena ingresada es distinta de SI y NO
-					{
-						system("cls");
-						printf("Valor incorrecto. Ingrese nuevamente...");
-						printf("\n\n");
-						system("pause");
-						system("cls");	
-					}
-
-				}
-				while( (strcmp((strupr(centinela)), "SI") != 0) && (strcmp((strupr(centinela)), "NO") != 0) );
-				
-			} // Cierre if de bandera	
-			else
+			if( band_encontrado == false )
 			{
 				system("cls");
-				printf("No se encontro el codigo del prestamo ingresado...");
+				printf("No se encontro el codigo del prestamo. Ingrese nuevamente...");
 				printf("\n\n");
 				system("pause");
-				system("cls");
-				
-				fclose(arch_prestamos_o);
-				Modulo_Prestamos_Objetos(); // Retornar a la funcion
 			}
-	
-	} // Cierre if de archivo
+			
+		}
+		while(band_encontrado == false);
+		
+		do
+		{
+			system("cls");
+			printf("-- COMPLETAR UN PRESTAMO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir')");	
+			printf("\n\n\tDESEA COMPLETAR EL PRESTAMO(SI|NO): ");
+			_flushall();
+			gets(centinela);
+			
+			strcpy(cpy_centinela, centinela);
+			
+			if(strcmp(strupr(cpy_centinela), "SI") == 0)
+			{
+				bandera = NULL;
+				Reg_Prestamos_O.borrado = true;
+				fseek(arch_prestamos_o, (long)-sizeof(Reg_Prestamos_O), SEEK_CUR);
+				
+				fwrite(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+				
+				// ---------------------------- BAJA FISICA DEL ARCHIVO ------------------------------
+					FILE *aux;
+					aux = fopen("auxiliar.dat", "w+b");
+					
+					rewind(arch_prestamos_o);
+					fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+					
+					while (!feof(arch_prestamos_o))
+					{
+						if (Reg_Prestamos_O.borrado == false)
+						{	
+							fwrite(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, aux);
+							bandera = true;
+						}
+						
+						fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
+					}
+					
+					if (bandera = true)
+					{
+						system("cls");
+						printf("Se ha completado el prestamo exitosamente...");
+						printf("\n\n");
+						system("pause");
+						system("cls");
+					}
+					else
+					{
+						system("cls");
+						printf("No se pudo completar el prestamo.");
+						printf("\n\n");
+						system("pause");
+					}
+					
+					fclose(arch_prestamos_o);
+					fclose(aux);
+					
+					remove("Prestamos_O.dat");
+					rename("auxiliar.dat", "Prestamos_O.dat");
+					remove("auxiliar.dat");
+					
+				// -----------------------------------------------------------------------------------		
+			}
+			else if(strcmp(strupr(cpy_centinela), "NO") == 0)
+			{
+				system("cls");
+				printf("No se ha borrado el prestamo ingresado...");
+				printf("\n\n");
+				system("pause");
+			}
+			else if(strcmp(strupr(cpy_centinela), "NO") != 0 && (strcmp(strupr(cpy_centinela), "SI") != 0))
+			{
+				system("cls");
+				printf("Valor incorrecto. Ingrese nuevamente...");
+				printf("\n\n");
+				system("pause");
+			}
+			
+		}
+		while(strcmp(strupr(cpy_centinela), "NO") != 0 && (strcmp(strupr(cpy_centinela), "SI") != 0));
+	}
 }
 
 void Modulo_Prestamos_Objetos_Buscar()
