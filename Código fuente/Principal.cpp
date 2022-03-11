@@ -7,7 +7,7 @@
 
 typedef char string[81];
 
-// ---------REGISTROS----------
+// ---------REGISTROS----------	
 
 	struct Fecha
 	{
@@ -24,7 +24,9 @@ typedef char string[81];
 		string curso;
 		string dni;		
 	
-		bool borrado;	
+		bool borrado;
+		bool prestamo_libro;
+		bool prestamo_objeto;	
 	};
 	
 	struct Profesionales
@@ -35,6 +37,8 @@ typedef char string[81];
 		string dni;	
 		
 		bool borrado;
+		bool prestamo_libro;
+		bool prestamo_objeto;
 	};
 		
 	struct Libros
@@ -5492,7 +5496,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 										}
 										while((profesional_existente == false && estudiante_existente == false) || ((strcmp(cent_socio, "SI") != 0 && strcmp(cent_socio, "NO") != 0)));
 
-													
+										if(strcmp(cent_socio, "SI") == 0)
+										{			
 												do
 												{
 													profesional_existente = NULL;
@@ -5584,7 +5589,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 															}															
 													}
 													while(profesional_existente == false && estudiante_existente == false);	
-												
+											}	
 											 // cierre else if si
 											if(strcmp(cent_socio, "NO") == 0) // SI no es socio, se carga como particular.
 											{
@@ -5926,6 +5931,35 @@ void Modulo_Prestamos_Libros_Nuevo()
 										
 										fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
+												
+																			
+										estudiante_existente = NULL;
+										arch_estudiantes = fopen("Estudiantes.dat", "r+b");
+										if(arch_estudiantes != NULL)
+										{
+											rewind(arch_estudiantes);	
+											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											
+											while(!feof(arch_estudiantes) && estudiante_existente == false)
+											{
+												if(strcmp(id, Reg_Estudiantes.id) == 0)
+												{
+													estudiante_existente = true;
+													break;
+												}
+												
+												if( estudiante_existente == false)
+													fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											}																
+										}
+										
+										if(estudiante_existente == true)
+										{
+											Reg_Estudiantes.prestamo_libro = true;
+											
+											fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
+											fwrite(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);																
+										}										
 										
 										dd = Fecha_Dia();
 										mm = Fecha_Mes();
@@ -6064,6 +6098,34 @@ void Modulo_Prestamos_Libros_Nuevo()
 										
 										fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
+										
+										profesional_existente = NULL;
+										arch_profesionales = fopen("Profesionales.dat", "r+b");
+										if(arch_profesionales != NULL)
+										{
+											rewind(arch_profesionales);	
+											fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											
+											while(!feof(arch_estudiantes) && estudiante_existente == false)
+											{
+												if(strcmp(id, Reg_Estudiantes.id) == 0)
+												{
+													profesional_existente = true;
+													break;
+												}
+												
+												if( profesional_existente == false)
+													fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											}																
+										}
+										
+										if(profesional_existente == true)
+										{
+											Reg_Profesionales.prestamo_libro = true;
+											
+											fseek(arch_profesionales, (long)-sizeof(Reg_Profesionales), SEEK_CUR);
+											fwrite(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);																
+										}										
 	
 										dd = Fecha_Dia();
 										mm = Fecha_Mes();
@@ -7493,7 +7555,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 												gets(cent_socio);
 												strupr(cent_socio);
 												
-												if(strcmp(cent_socio, "salir") == 0)
+												if(strcmp(cent_socio, "SALIR") == 0)
 												{
 												 	fclose(arch_prestamos_o);
 												 	fclose(arch_objetos);
@@ -7532,7 +7594,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 													system("pause");	
 												}
 											}
-											while((profesional_existente == false && estudiante_existente == false) || ((strcmp(cent_socio, "SI") != 0 && strcmp(cent_socio, "NO") != 0)));
+											while((strcmp(cent_socio, "SI") != 0 && strcmp(cent_socio, "NO") != 0));
 											
 											if(strcmp(cent_socio, "SI") == 0)
 											{
@@ -7558,51 +7620,49 @@ void Modulo_Prestamos_Objetos_Nuevo()
 														
 													 	fclose(arch_prestamos_o);
 													 	fclose(arch_objetos);
+	
 													 	
 														Modulo_Prestamos_Objetos_Nuevo(); // Salida de la carga de datos.								
 													}									
 													
 													//  --------------- COMPROBACION DE EXISTENCIA DE ID ---------------
 													
-															arch_profesionales = fopen("Profesionales.dat", "rb");
+															arch_profesionales = fopen("Profesionales.dat", "r+b");
 															if(arch_profesionales != NULL)
 															{
+																rewind(arch_profesionales);	
+																fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
 																
+																while(!feof(arch_profesionales) && profesional_existente == false)
+																{
+																	if(strcmp(id, Reg_Profesionales.id) == 0)
+																	{
+																		profesional_existente = true;
+																		break;
+																	}
+																	
+																	if(profesional_existente == false)
+																		fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+																}																
 															}
 															
-															arch_estudiantes = fopen("Estudiantes.dat", "rb");
+															arch_estudiantes = fopen("Estudiantes.dat", "r+b");
 															if(arch_estudiantes != NULL)
 															{
+																rewind(arch_estudiantes);	
+																fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
 																
-															}
-															rewind(arch_profesionales);
-															rewind(arch_estudiantes);
-															
-															fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
-															fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
-															
-															while(!feof(arch_profesionales) && profesional_existente == false)
-															{
-																if(strcmp(id, Reg_Profesionales.id) == 0)
+																while(!feof(arch_estudiantes) && estudiante_existente == false)
 																{
-																	profesional_existente = true;
-																	break;
-																}
-																
-																if(profesional_existente == false)
-																	fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
-															}
-															
-															while(!feof(arch_estudiantes) && estudiante_existente == false)
-															{
-																if(strcmp(id, Reg_Estudiantes.id) == 0)
-																{
-																	estudiante_existente = true;
-																	break;
-																}
-																
-																if( estudiante_existente == false)
-																	fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+																	if(strcmp(id, Reg_Estudiantes.id) == 0)
+																	{
+																		estudiante_existente = true;
+																		break;
+																	}
+																	
+																	if( estudiante_existente == false)
+																		fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+																}																
 															}
 															
 															if(profesional_existente == true)
@@ -7616,7 +7676,7 @@ void Modulo_Prestamos_Objetos_Nuevo()
 																strcpy(apeYNom, Reg_Estudiantes.apeYNom);
 																strcpy(dni, Reg_Estudiantes.dni);
 																strcpy(turno, Reg_Estudiantes.turno);
-																strcpy(curso, Reg_Estudiantes.curso);
+																strcpy(curso, Reg_Estudiantes.curso);																
 															}
 															
 															if(estudiante_existente == false && profesional_existente == false)
@@ -7966,7 +8026,36 @@ void Modulo_Prestamos_Objetos_Nuevo()
 										
 										fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
 										fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+										
+										
+										estudiante_existente = NULL;
+										arch_estudiantes = fopen("Estudiantes.dat", "r+b");
+										if(arch_estudiantes != NULL)
+										{
+											rewind(arch_estudiantes);	
+											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
 											
+											while(!feof(arch_estudiantes) && estudiante_existente == false)
+											{
+												if(strcmp(id, Reg_Estudiantes.id) == 0)
+												{
+													estudiante_existente = true;
+													break;
+												}
+												
+												if( estudiante_existente == false)
+													fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											}																
+										}
+										
+										if(estudiante_existente == true)
+										{
+											Reg_Estudiantes.prestamo_objeto = true;
+											
+											fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
+											fwrite(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);																
+										}
+																						
 										strcpy(Reg_Prestamos_O.idprestatario, id);
 										strcpy(Reg_Prestamos_O.apeYNom, apeYNom);
 										strcpy(Reg_Prestamos_O.dni, dni);
@@ -8104,6 +8193,35 @@ void Modulo_Prestamos_Objetos_Nuevo()
 										
 										fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
 										fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+										
+										
+										profesional_existente = NULL;
+										arch_profesionales = fopen("Profesionales.dat", "r+b");
+										if(arch_profesionales != NULL)
+										{
+											rewind(arch_profesionales);	
+											fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											
+											while(!feof(arch_profesionales) && profesional_existente == false)
+											{
+												if(strcmp(id, Reg_Profesionales.id) == 0)
+												{
+													estudiante_existente = true;
+													break;
+												}
+												
+												if( profesional_existente == false)
+													fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											}																
+										}
+										
+										if(profesional_existente == true)
+										{
+											Reg_Profesionales.prestamo_objeto = true;
+											
+											fseek(arch_profesionales, (long)-sizeof(Reg_Profesionales), SEEK_CUR);
+											fwrite(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);																
+										}
 										
 										dd = Fecha_Dia();
 										mm = Fecha_Mes();
