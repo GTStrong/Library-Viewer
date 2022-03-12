@@ -8802,6 +8802,7 @@ void Modulo_Prestamos_Objetos_Completar()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 	FILE *arch_prestamos_o;
+	FILE *arch_objetos;
 	
 	arch_prestamos_o = fopen("Prestamos_O.dat", "r+b");
 	
@@ -8813,11 +8814,12 @@ void Modulo_Prestamos_Objetos_Completar()
 		printf("\n\n");
 		system("pause");
 	}
-		
+
 	// ----------------------------------------------------------
 	else
 	{
 		Prestamos_Objetos Reg_Prestamos_O;
+		Objetos Reg_Objetos;
 		
 		string target = {NULL};
 		string centinela = {NULL};
@@ -8871,6 +8873,29 @@ void Modulo_Prestamos_Objetos_Completar()
 			
 		}
 		while(band_encontrado == false);
+		
+		arch_objetos = fopen("Objetos.dat", "r+b");
+		
+		rewind(arch_objetos);
+		fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+		
+		band_encontrado == false;
+		while(!feof(arch_objetos) && band_encontrado == false)
+		{
+			if(srtcmp(Reg_Prestamos_O.objeto, Reg_Objetos.nombre) == 0)
+			{
+				band_encontrado = true;
+				break;
+			}
+			
+			if(band_encontrado = false)
+				fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+		}
+		
+		fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
+		
+		Reg_Objetos.existencias = Reg_Objetos.existencias + Reg_Prestamos_O.cantidad;
+
 		
 		do
 		{
