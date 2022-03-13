@@ -5109,16 +5109,16 @@ void Modulo_Prestamos_Libros_Listar()
 		arch_libros = fopen("Libros.dat", "rb");
 		
 		rewind(arch_prestamos_l);
-		rewind(arch_libros);
 		fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-		fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 		
 		system("cls");
 		while(!feof(arch_prestamos_l))
 		{
+			rewind(arch_libros);
+			fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 			while(!feof(arch_libros))
 			{
-				if(strcmp(Reg_Prestamos_L.cod_libro, Reg_Libros.codigo) == 0)
+				if(strcmp(Reg_Prestamos_L.cod_libro, Reg_Libros.codigo) == 0 && Reg_Prestamos_L.borrado == false)
 				{
 					bandera = true;
 				
@@ -5139,7 +5139,8 @@ void Modulo_Prestamos_Libros_Listar()
 
 			
 			fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-			fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);	
+			
+			i++;
 		}
 		
 		if(bandera == false)
@@ -5381,7 +5382,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 										for(int i=0; i<strlen(codLibro); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
 											codLibro[i] = NULL;
 										
-									 	fclose(arch_prestamos_o);
+									 	fclose(arch_prestamos_l);
 									 	fclose(arch_libros);
 									 	
 										Modulo_Prestamos_Libros_Nuevo(); // Salida de la carga de datos.								
@@ -5486,10 +5487,10 @@ void Modulo_Prestamos_Libros_Nuevo()
 											
 											if(strcmp(cent_socio, "salir") == 0)
 											{
-											 	fclose(arch_prestamos_o);
-											 	fclose(arch_objetos);
+											 	fclose(arch_prestamos_l);
+											 	fclose(arch_libros);
 											 	
-												Modulo_Prestamos_Objetos_Nuevo(); // Salida de la carga de datos.								
+												Modulo_Prestamos_Libros_Nuevo(); // Salida de la carga de datos.								
 											}
 											
 											if(strcmp(cent_socio, "SI") == 0)
@@ -5545,7 +5546,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 														for(int i=0; i<strlen(id); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
 															id[i] = NULL;
 														
-													 	fclose(arch_prestamos_o);
+													 	fclose(arch_prestamos_l);
 													 	//fclose(arch_objetos);
 													 	fclose(arch_libros);
 													 	
@@ -5634,7 +5635,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 													printf("\n\nDATOS DEL PRESTATARIO: ");
 													printf("\n\tID DE PRESTATARIO: ");
 													_flushall();
-													gets(id);
+													gets(id);												
 													
 													if(strcmp(id, "salir") == 0)
 													{
@@ -5650,7 +5651,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 													//  --------------- COMPROBACION DE EXISTENCIA DE ID ---------------
 															
 															arch_profesionales = fopen("Profesionales.dat", "rb");
-															
+																
 															if(arch_profesionales != NULL)
 															{
 																rewind(arch_profesionales);
@@ -5668,6 +5669,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 																		fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
 																}																															
 															}
+																											
+															arch_estudiantes = fopen("Estudiantes.dat", "rb");															
 															
 															if(arch_estudiantes != NULL)
 															{
@@ -5686,20 +5689,20 @@ void Modulo_Prestamos_Libros_Nuevo()
 																		fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
 																}
 															}
-															
+														
 															rewind(arch_prestamos_l);
 															fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 															
 															while(!feof(arch_prestamos_l) && socio_existente == false)
-															{
-																if(strcmp(id, Reg_Prestamos_L.idprestatario))
+															{		
+																if(strcmp(id, Reg_Prestamos_L.idprestatario) == 0)
 																{
-																	dni_existente = true;
+																	socio_existente = true;
 																	break;
 																}
 																
 																if(socio_existente == false)
-																	fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+																	fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 															}															
 																																								
 															if(socio_existente == true)
@@ -5718,7 +5721,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 													printf("\n\n(Si desea cancelar, escriba 'salir')");
 													printf("\n\nDATOS DEL PRESTATARIO: ");
 													
-														printf("\n\tAPELLIDO Y NOMBRE: ");
+													printf("\n\tAPELLIDO Y NOMBRE: ");
 													_flushall();
 													gets(apeYNom);
 													
@@ -5727,10 +5730,10 @@ void Modulo_Prestamos_Libros_Nuevo()
 														for(int i=0; i<strlen(apeYNom); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
 															apeYNom[i] = NULL;
 														
-													 	fclose(arch_prestamos_o);
+													 	fclose(arch_prestamos_l);
 													 	fclose(arch_libros);
 													 	
-														Modulo_Prestamos_Objetos_Nuevo(); // Salida de la carga de datos.								
+														Modulo_Prestamos_Libros_Nuevo(); // Salida de la carga de datos.								
 													}					
 												
 				
@@ -5754,7 +5757,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 															for(int i=0; i<strlen(dni); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
 																dni[i] = NULL;
 																
-														 	fclose(arch_prestamos_o);
+														 	fclose(arch_prestamos_l);
 														 	fclose(arch_libros);
 						
 															Modulo_Prestamos_Libros_Nuevo(); // Salida de la carga de datos.							
@@ -5807,14 +5810,14 @@ void Modulo_Prestamos_Libros_Nuevo()
 															
 															while(!feof(arch_prestamos_l) && dni_existente == false)
 															{
-																if(strcmp(dni, Reg_Prestamos_L.dni))
+																if(strcmp(dni, Reg_Prestamos_L.dni) == 0)
 																{
 																	dni_existente = true;
 																	break;
 																}
 																
 																if(dni_existente == false)
-																	fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+																	fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 
 															}
 																														
@@ -5847,7 +5850,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 													for(int i=0; i<strlen(telefono); i++) // Cuando la cadena es igual a "Salir", entonces no se tiene que cargar el dato en la variable. 
 														telefono[i] = NULL;
 													
-												 	fclose(arch_prestamos_o);
+												 	fclose(arch_prestamos_l);
 												 	fclose(arch_libros);
 												 	
 													Modulo_Prestamos_Libros_Nuevo(); // Salida de la carga de datos.								
@@ -5989,6 +5992,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 											fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
 											fwrite(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);																
 										}										
+										
+										Reg_Prestamos_L.borrado = false;
 										
 										dd = Fecha_Dia();
 										mm = Fecha_Mes();
@@ -6165,6 +6170,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 										Reg_Prestamos_L.fecha.mm = mm;
 										Reg_Prestamos_L.fecha.aaaa = aaaa;
 										
+										Reg_Prestamos_L.borrado = false;
+										
 										fseek(arch_prestamos_l, 2, SEEK_END);
 										fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);	
 										
@@ -6298,6 +6305,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 											Reg_Prestamos_L.fecha.dd = dd;
 											Reg_Prestamos_L.fecha.mm = mm;
 											Reg_Prestamos_L.fecha.aaaa = aaaa;
+											
+											Reg_Prestamos_L.borrado = false;
 											
 											fseek(arch_prestamos_l, 2, SEEK_END);
 											fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);	
@@ -6778,6 +6787,8 @@ void Modulo_Prestamos_Libros_Completar()
 	// ----------------------------------------------------------
 	else
 	{
+		int posicion = NULL;
+		
 		Prestamos_Libros Reg_Prestamos_L;
 		Libros Reg_Libros;
 		
@@ -6808,7 +6819,6 @@ void Modulo_Prestamos_Libros_Completar()
 				Modulo_Prestamos_Libros();
 			}
 			
-			band_encontrado = false;
 			rewind(arch_prestamos_l);
 			fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 			
@@ -6817,14 +6827,24 @@ void Modulo_Prestamos_Libros_Completar()
 				if(strcmp(target, Reg_Prestamos_L.codigo) == 0)
 				{
 					band_encontrado = true;
+					if(Reg_Prestamos_L.borrado == true)
+					{
+						printf("holaaaaaaaaaAaaaaAAAAAAA");
+						system("pause");
+					}
+					/*printf("Posicion: %d\n\n", posicion);
+					system("pause");*/
+					//posicion = ftell(arch_prestamos_l);
+					/*printf("Posicion: %d\n\n", posicion);
+					system("pause");*/
 					
 					break;
 				}
 				
-				if( band_encontrado == false )
+				if(band_encontrado == false)
 					fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 			}		
-			if( band_encontrado == false )
+			if(band_encontrado == false)
 			{
 				system("cls");
 				printf("No se encontro el codigo del prestamo. Ingrese nuevamente...");
@@ -6835,7 +6855,7 @@ void Modulo_Prestamos_Libros_Completar()
 		}
 		while(band_encontrado == false);
 		
-		arch_libros = fopen("Libros.dat", "r+b");
+		/*arch_libros = fopen("Libros.dat", "r+b");
 		rewind(arch_libros);
 		fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 		
@@ -6846,7 +6866,7 @@ void Modulo_Prestamos_Libros_Completar()
 			{
 				band_encontrado = true;
 				fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
-				
+								
 				break;
 			}
 			
@@ -6854,7 +6874,8 @@ void Modulo_Prestamos_Libros_Completar()
 				fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_libros);
 		}
 		
-		Reg_Libros.existencias = Reg_Libros.existencias + Reg_Prestamos_L.cantidad;				
+		Reg_Libros.existencias = Reg_Libros.existencias + Reg_Prestamos_L.cantidad;	*/			
+
 		
 		do
 		{
@@ -6864,35 +6885,17 @@ void Modulo_Prestamos_Libros_Completar()
 			printf("\n\n\tDESEA COMPLETAR EL PRESTAMO(SI|NO): ");
 			_flushall();
 			gets(centinela);
-			
 			strcpy(cpy_centinela, centinela);
 			
 			if(strcmp(strupr(cpy_centinela), "SI") == 0)
 			{
 				bandera = NULL;
-				
-				band_encontrado = false;
-				
-				printf("%s", target);
-				system("pause");
-				
-				rewind(arch_prestamos_l);
-				fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-				
-				while(!feof(arch_prestamos_l) && band_encontrado == false)
-				{
-					if(strcmp(target, Reg_Prestamos_L.codigo) == 0)
-					{
-						band_encontrado = true;
-						fseek(arch_prestamos_l, (long)-sizeof(Reg_Prestamos_L), SEEK_CUR);
-						break;
-					}
-					
-					if( band_encontrado == false )
-						fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-				}				
+		
+				/*printf("Posicion: %d\n\n", posicion);
+				system("pause");*/
 				
 				Reg_Prestamos_L.borrado = true;
+				fseek(arch_prestamos_l, (long)-sizeof(Reg_Prestamos_L), SEEK_CUR);				
 				fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 				
 				// ---------------------------- BAJA FISICA DEL ARCHIVO ------------------------------
@@ -6907,37 +6910,32 @@ void Modulo_Prestamos_Libros_Completar()
 						if (Reg_Prestamos_L.borrado == false)
 						{	
 							fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, aux);
-							bandera = true;
 						}
 						
 						fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 					}
 										
-					if(bandera == true)
-					{
-						system("cls");
-						printf("Se ha completado el prestamo exitosamente...");
-						printf("\n\n");
-						system("pause");
-						system("cls");
-					}
-					else
-					{
-						system("cls");
-						printf("No se pudo completar el prestamo.");
-						printf("\n\n");
-						system("pause");
-					}
-					
 					fclose(arch_prestamos_l);
 					fclose(aux);
 					
 					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+					remove("Prestamos_L.dat");
+						
+							
 					rename("auxiliar.dat", "Prestamos_L.dat");
-					remove("auxiliar.dat");
-					
-					fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
-					fclose(arch_libros);
+			
+					/*fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
+					fclose(arch_libros);*/
 					
 				// -----------------------------------------------------------------------------------		
 			}
@@ -9000,33 +8998,16 @@ void Modulo_Prestamos_Objetos_Completar()
 						if (Reg_Prestamos_O.borrado == false)
 						{	
 							fwrite(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, aux);
-							bandera = true;
 						}
 						
 						fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
-					}
-					
-					if (bandera = true)
-					{
-						system("cls");
-						printf("Se ha completado el prestamo exitosamente...");
-						printf("\n\n");
-						system("pause");
-						system("cls");
-					}
-					else
-					{
-						system("cls");
-						printf("No se pudo completar el prestamo.");
-						printf("\n\n");
-						system("pause");
 					}
 					
 					fclose(arch_prestamos_o);
 					fclose(aux);
 					
 					remove("Prestamos_O.dat");
-					rename("auxiliar.dat", "Prestamos_O.dat");
+					rename("auxiliar.dat", "Prestamos.O.dat");
 					remove("auxiliar.dat");
 					
 					fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
