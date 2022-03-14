@@ -5251,15 +5251,13 @@ void Modulo_Prestamos_Libros_Listar()
 					
 					printf("\n\n------------------------------------------------------------------");
 					printf("\n\n");	
-				}
 					
+					i++;
+				}	
 				fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);				
 			}
 
-			
 			fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-			
-			i++;
 		}
 		
 		if(bandera == false)
@@ -5514,7 +5512,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 										
 										while(!feof(arch_libros) && libro_existente == false)
 										{
-											if(strcmp(codLibro, Reg_Libros.codigo) == 0)
+											if(strcmp(codLibro, Reg_Libros.codigo) == 0 && Reg_Libros.borrado == false)
 											{
 												libro_existente = true;
 												break;
@@ -5547,6 +5545,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 								do
 								{	
 									cantidad_incorrecta = NULL;
+									libro_existente = NULL;
+									nuevaCantidad = NULL;
 									
 									system("cls");
 									printf("-- NUEVO PRESTAMO --");
@@ -5557,7 +5557,30 @@ void Modulo_Prestamos_Libros_Nuevo()
 									
 									//  --------------- COMPROBACION DE CANTIDAD A PRESTAR CORRECTA ---------------
 										
+										rewind(arch_libros);
+										fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
+										
+										while(!feof(arch_libros) && libro_existente == false)
+										{
+											if(strcmp(codLibro, Reg_Libros.codigo) == 0 && Reg_Libros.borrado == false)
+											{
+												libro_existente = true;
+												break;
+											}
+											
+											if(libro_existente == false)
+												fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);			
+										}
+										
+										printf("Cantidad ingresada: %d\n\n", cantidad);
+										system("pause");						
+										printf("Existencia actual del libro ingresado: %d\n\n", Reg_Libros.existencias);
+										system("pause");
+										
 										nuevaCantidad = Reg_Libros.existencias - cantidad;
+										
+										printf("Nueva cantidad: %d\n\n", nuevaCantidad);
+										system("pause");
 											
 										if(nuevaCantidad < 0)
 										{
@@ -5574,9 +5597,9 @@ void Modulo_Prestamos_Libros_Nuevo()
 									
 									Reg_Libros.existencias = nuevaCantidad;
 									
-									/*printf("Reg_Libros.Existencias vale: %d", Reg_Libros.existencias);
+									printf("Reg_Libros.Existencias vale: %d", Reg_Libros.existencias);
 									printf("\n\n");
-									system("pause");*/
+									system("pause");
 									
 									/*fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 									fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);*/
@@ -5643,7 +5666,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 												system("pause");	
 											}
 										}
-										while((profesional_existente == false && estudiante_existente == false) || ((strcmp(cent_socio, "SI") != 0 && strcmp(cent_socio, "NO") != 0)));
+										while((profesional_existente == false && estudiante_existente == false) && ((strcmp(cent_socio, "SI") != 0 && strcmp(cent_socio, "NO") != 0)));
 
 										if(strcmp(cent_socio, "SI") == 0)
 										{			
@@ -6033,7 +6056,6 @@ void Modulo_Prestamos_Libros_Nuevo()
 									
 									printf("-- DATOS DEL PRESTAMO --");
 									printf("\n\tCodigo de prestamo: %s", codigo);
-									strcpy(Reg_Prestamos_L.cod_libro, codLibro);
 									printf("\n\tLibro: %s", Reg_Libros.titulo);
 									printf("\n\tCantidad: %d", cantidad);
 									
@@ -6059,13 +6081,15 @@ void Modulo_Prestamos_Libros_Nuevo()
 										strcpy(Reg_Prestamos_L.apeYNom, apeYNom);
 										strcpy(Reg_Prestamos_L.dni, dni);
 										strcpy(Reg_Prestamos_L.telefono, telefono);
-																				
+										
+										
+										libro_existente = NULL;										
 										rewind(arch_libros);
 										fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 										
 										while(!feof(arch_libros) && libro_existente == false)
 										{
-											if(strcmp(codLibro, Reg_Libros.codigo) == 0)
+											if(strcmp(codLibro, Reg_Libros.codigo) == 0 && Reg_Libros.borrado == false) 
 											{
 												libro_existente = true;
 												break;
@@ -6075,15 +6099,24 @@ void Modulo_Prestamos_Libros_Nuevo()
 												fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);			
 										}	
 										
+										printf("cantidad ingresada: %d\n\n", cantidad);
+										system("pause");
+																			
+										printf("Existencia actual del libro: %d\n\n", Reg_Libros.existencias);
+										system("pause");										
+										
+										nuevaCantidad = NULL;
 										nuevaCantidad = Reg_Libros.existencias - cantidad;
 										Reg_Libros.existencias = nuevaCantidad;
+										
+										printf("Existencia actualizada de libros: %d\n\n", Reg_Libros.existencias);
+										system("pause");												
 										
 										Reg_Libros.prestado = true;
 										
 										fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
-												
-																			
+								
 										estudiante_existente = NULL;
 										arch_estudiantes = fopen("Estudiantes.dat", "r+b");
 										if(arch_estudiantes != NULL)
@@ -6237,6 +6270,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 											if(strcmp(codLibro, Reg_Libros.codigo) == 0)
 											{
 												libro_existente = true;
+												fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 												break;
 											}
 											
@@ -6244,12 +6278,13 @@ void Modulo_Prestamos_Libros_Nuevo()
 												fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);			
 										}	
 										
+										printf("cantidad ingresada: %d\n\n", cantidad);
+										system("pause");
+										
 										nuevaCantidad = Reg_Libros.existencias - cantidad;
 										Reg_Libros.existencias = nuevaCantidad;
 										
 										Reg_Libros.prestado = true;
-										
-										fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 										
 										profesional_existente = NULL;
@@ -6401,19 +6436,21 @@ void Modulo_Prestamos_Libros_Nuevo()
 												if(strcmp(codLibro, Reg_Libros.codigo) == 0)
 												{
 													libro_existente = true;
+													fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 													break;
 												}
 												
 												if(libro_existente == false)
 													fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);			
 											}	
+
+											printf("cantidad ingresada: %d\n\n", cantidad);
+											system("pause");
 											
 											nuevaCantidad = Reg_Libros.existencias - cantidad;
 											Reg_Libros.existencias = nuevaCantidad;
-											
+
 											Reg_Libros.prestado = true;
-											
-											fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 											fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 											
 											dd = Fecha_Dia();
@@ -6916,6 +6953,8 @@ void Modulo_Prestamos_Libros_Completar()
 		string cpy_target = {NULL};
 		string cpy_centinela = {NULL};
 		
+		string codLibro = {NULL};
+		
 		bool band_encontrado = NULL;
 		bool bandera = NULL;
 		
@@ -6964,26 +7003,37 @@ void Modulo_Prestamos_Libros_Completar()
 		}
 		while(band_encontrado == false);
 		
+		
+		
+		band_encontrado = NULL;
 		arch_libros = fopen("Libros.dat", "r+b");
+		
 		rewind(arch_libros);
 		fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 		
-		band_encontrado = false;
 		while(!feof(arch_libros) && band_encontrado == false)
-		{
-			if(strcmp(Reg_Prestamos_L.cod_libro, Reg_Libros.codigo) == 0)
+		{	
+			if(strcmp(Reg_Prestamos_L.cod_libro, Reg_Libros.codigo) == 0 && Reg_Libros.borrado == false)
 			{
-				band_encontrado = true;
-				fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
-								
+				band_encontrado = true;	
+				fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);		
 				break;
 			}
 			
 			if(band_encontrado == false)
-				fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_libros);
+				fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 		}
 		
-		Reg_Libros.existencias = Reg_Libros.existencias + Reg_Prestamos_L.cantidad;				
+		printf("Reg_Libros.existencias vale:  %d\n\n", Reg_Libros.existencias);
+		system("pause");
+		
+		printf("Reg_Prestamos_L.cantidad vale: %d\n\n", Reg_Prestamos_L.cantidad);
+		system("pause");
+		
+		Reg_Libros.existencias = Reg_Libros.existencias + Reg_Prestamos_L.cantidad;		
+		
+		printf("Reg_Libros.existencias actualizado vale:  %d\n\n", Reg_Libros.existencias);
+		system("pause");		
 
 		do
 		{
@@ -6998,11 +7048,19 @@ void Modulo_Prestamos_Libros_Completar()
 			if(strcmp(strupr(cpy_centinela), "SI") == 0)
 			{
 				bandera = NULL;
+				
+				fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
+				
+				printf("Reg_Libros.existencias 2 vale:  %d\n\n", Reg_Libros.existencias);
+				system("pause");
+				fclose(arch_libros);
 		
 				/*printf("Posicion: %d\n\n", posicion);
 				system("pause");*/
 				
-				Reg_Prestamos_L.borrado = true;				
+				Reg_Prestamos_L.borrado = true;	
+				
+							
 				fwrite(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
 				
 				// ---------------------------- BAJA FISICA DEL ARCHIVO ------------------------------
@@ -7027,9 +7085,6 @@ void Modulo_Prestamos_Libros_Completar()
 
 					remove("Prestamos_L.dat");
 					rename("auxiliar.dat", "Prestamos_L.dat");
-			
-					fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
-					fclose(arch_libros);
 					
 				// -----------------------------------------------------------------------------------		
 			}
