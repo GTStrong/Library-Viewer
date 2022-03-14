@@ -6236,7 +6236,6 @@ void Modulo_Prestamos_Libros_Nuevo()
 									
 									printf("-- DATOS DEL PRESTAMO --");
 									printf("\n\tCodigo de prestamo: %s", codigo);
-									strcpy(Reg_Prestamos_L.cod_libro, codLibro);
 									printf("\n\tLibro: %s", Reg_Libros.titulo);
 									printf("\n\tCantidad: %d", cantidad);
 									
@@ -6261,7 +6260,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 										strcpy(Reg_Prestamos_L.apeYNom, apeYNom);
 										strcpy(Reg_Prestamos_L.dni, dni);
 										strcpy(Reg_Prestamos_L.telefono, telefono);
-
+										
+										libro_existente = NULL;
 										rewind(arch_libros);
 										fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 										
@@ -6270,7 +6270,7 @@ void Modulo_Prestamos_Libros_Nuevo()
 											if(strcmp(codLibro, Reg_Libros.codigo) == 0)
 											{
 												libro_existente = true;
-												fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
+												
 												break;
 											}
 											
@@ -6281,10 +6281,12 @@ void Modulo_Prestamos_Libros_Nuevo()
 										printf("cantidad ingresada: %d\n\n", cantidad);
 										system("pause");
 										
+										nuevaCantidad = NULL;
 										nuevaCantidad = Reg_Libros.existencias - cantidad;
 										Reg_Libros.existencias = nuevaCantidad;
 										
 										Reg_Libros.prestado = true;
+										fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 										
 										profesional_existente = NULL;
@@ -6372,6 +6374,8 @@ void Modulo_Prestamos_Libros_Nuevo()
 										printf("\n\n");
 										system("pause");
 										system("cls");
+										
+										break;
 									}
 									else if(strcmp(centinela, "NO") == 0)
 									{
