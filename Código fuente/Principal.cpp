@@ -467,16 +467,14 @@ void Modulo_Biblioteca_Libros_ListarLibros()
 				
 				printf("LIBRO [%d]\n", i+1);
 			
-				printf("\n\tCodigo: %s", Reg_Libros.codigo);
+				printf("\n\n\tCodigo: %s", Reg_Libros.codigo);
 				printf("\n\tTitulo: %s",Reg_Libros.titulo);
 				printf("\n\tEditorial: %s",Reg_Libros.editorial);
 				printf("\n\tSeccion: %s", Reg_Libros.seccion);
 				printf("\n\tAutor: %s", Reg_Libros.autor);
 				printf("\n\tExistencias: %d", Reg_Libros.existencias);
-				printf("\n\n");
 				
-				printf("------------------------------------------------------------------");
-				
+				printf("\n\n------------------------------------------------------------------");				
 				printf("\n\n");
 				
 				i++;	
@@ -1621,9 +1619,12 @@ void Modulo_Biblioteca_Objetos_ListarObjetos()
 				
 				printf("OBJETO [%d]", i+1);
 			
-					printf("\n\tCodigo: %s", Reg_Objetos.codigo);
+					printf("\n\n\tCodigo: %s", Reg_Objetos.codigo);
 					printf("\n\tNombre del objeto: %s", Reg_Objetos.nombre);
 					printf("\n\tExistencias: %d", Reg_Objetos.existencias);
+					
+					printf("\n\n------------------------------------------------------------------");
+					
 					printf("\n\n\n");
 				
 				i++;	
@@ -2814,14 +2815,15 @@ void Modulo_Socios_Estudiantes_ListarEstudiantes()
 				
 				printf("ESTUDIANTE [%d]", i+1);
 			
-					printf("\n\tID: %s", Reg_Estudiantes.id);
+					printf("\n\n\tID: %s", Reg_Estudiantes.id);
 					printf("\n\tApellido y nombre: %s", Reg_Estudiantes.apeYNom);
 					printf("\n\tTurno: %s", Reg_Estudiantes.turno);
 					printf("\n\tCurso: %s", Reg_Estudiantes.curso);
-					printf("\n\tDNI: %s", Reg_Estudiantes.dni);					
-					printf("\n\n\n");
+					printf("\n\tDNI: %s", Reg_Estudiantes.dni);	
+					printf("\n\n------------------------------------------------------------------");				
+					printf("\n\n");
 				
-				i++;	
+				i++;
 			}
 				
 			fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
@@ -2912,7 +2914,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 							 	
 										 	// ------ COMPROBACION DE EXISTENCIA DEL CODIGO ------
 		
-									 	printf("\n\tINGRESE ID DEL SOCIO: ");
+									 	printf("\n\n\tINGRESE ID DEL SOCIO: ");
 										_flushall();
 										gets(id);
 											if(strcmp(id, "salir") == 0)
@@ -2975,7 +2977,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 								system("cls");
 								printf("-- CARGA DE DATOS DEL NUEVO SOCIO --");
 							 	printf("\n\n(Si desea cancelar, escriba 'salir')");
-								printf("\n\tAPELLIDO Y NOMBRE: ");
+								printf("\n\n\tAPELLIDO Y NOMBRE: ");
 								_flushall();
 								gets(apeYNom);
 									if(strcmp(apeYNom, "salir") == 0)
@@ -2993,7 +2995,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 									system("cls");
 									printf("-- CARGA DE DATOS DEL NUEVO SOCIO --");
 							 		printf("\n\n(Si desea cancelar, escriba 'salir')");
-									printf("\n\tDNI: ");
+									printf("\n\n\tDNI: ");
 									_flushall();
 									gets(dni);
 										if(strcmp(dni, "salir") == 0)
@@ -3009,8 +3011,8 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 										
 										while(!feof(arch_estudiantes) && dni_existente == false)
 										{
-											if(strcmp(id, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.borrado == false)
-											{
+											if(strcmp(dni, Reg_Estudiantes.dni) == 0 && Reg_Estudiantes.borrado == false)
+											{											
 												dni_existente = true;		
 												break;
 											}
@@ -3053,7 +3055,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 								system("cls");
 								printf("-- CARGA DE DATOS DEL NUEVO SOCIO --");
 							 	printf("\n\n(Si desea cancelar, escriba 'salir')");							
-								printf("\n\tCURSO: ");
+								printf("\n\n\tCURSO: ");
 								_flushall();
 								gets(curso);
 									if(strcmp(curso, "salir") == 0)
@@ -3067,7 +3069,7 @@ void Modulo_Socios_Estudiantes_NuevoEstudiante()
 								system("cls");
 								printf("-- CARGA DE DATOS DEL NUEVO SOCIO --");
 							 	printf("\n\n(Si desea cancelar, escriba 'salir')");
-								printf("\n\tTURNO: ");
+								printf("\n\n\tTURNO: ");
 								_flushall();
 								gets(turno);
 									if(strcmp(turno, "salir") == 0)
@@ -3287,46 +3289,68 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 		string curso = {NULL};	
 		string dni = {NULL};					
 		
-		bool bandera = false;
-		bool band_id = false;	
-		bool band_apeYNom = false;
-		bool band_turno = false;
-		bool band_curso = false;
-		bool band_dni = false;
+		bool bandera = NULL;
+		bool band_id = NULL;	
+		bool band_apeYNom = NULL;
+		bool band_turno = NULL;
+		bool band_curso = NULL;
+		bool band_dni = NULL;
 	
 		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
 		
-			system("cls");
-			printf("INGRESE ID DEL ESTUDIANTE A EDITAR: ");
-			_flushall();
-			gets(target);
-			
-			rewind(arch_estudiantes);
-			fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
-			
-			while(!feof(arch_estudiantes) && bandera == false)
+			do
 			{
-				if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.borrado == false)
+				bandera = NULL;
+				
+				system("cls");
+				printf("-- EDITAR SOCIO ESTUDIANTE --");
+				printf("\n\n(Si desea cancelar, escriba 'salir')");
+				printf("\n\n\tINGRESE ID DEL ESTUDIANTE A EDITAR: ");
+				_flushall();
+				gets(target);
+				
+				if(strcmp(target, "salir") == 0)
 				{
-					bandera = true;
-					fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
+					fclose(arch_estudiantes);
+					Modulo_Socios_Estudiantes();
+				}
+				
+				rewind(arch_estudiantes);
+				fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+				
+				while(!feof(arch_estudiantes) && bandera == false)
+				{
+					if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.borrado == false)
+					{
+						bandera = true;
+						fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
+					}
+					
+					if(bandera == false)
+					{
+						fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);					
+					}	
 				}
 				
 				if(bandera == false)
 				{
-					fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);					
+					system("cls");
+					printf("No se encontro el codigo del socio. Ingrese nuevamente...");
+					printf("\n\n");
+					system("pause");
+				}
+				else
+				{
+					system("cls");
+					printf("Se encontro el estudiante exitosamente...");
+					printf("\n\n");
+					system("pause");
 				}
 	
 			}
-				
-			if(bandera == true)
-			{
-				system("cls");
-				printf("Se encontro el estudiante exitosamente...");
-				printf("\n\n");
-				system("pause");
-				system("cls");
+			while(bandera == false);
 			
+
 		// ---------------------------------------------------------------------		
 		
 				do
@@ -3345,6 +3369,8 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 							
 							// Luego de ingresar el codigo en el case 4, si el codigo es incorrecto, 
 							//se tiene que volver a recorrer el archivo para volver a coincidir con el target anterior.
+							
+							arch_estudiantes = fopen("Estudiantes.dat", "r+b");
 							
 							rewind(arch_estudiantes);
 							fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
@@ -3567,7 +3593,7 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 													
 										// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
 														
-											bandera = false;
+											bandera = NULL;
 											
 											rewind(arch_estudiantes);
 											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
@@ -3657,19 +3683,10 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 					}
 					while(true);					
 			}
-			
-		else
-		{
-			system("cls");
-			printf("No se encontro el ID del estudiante ingresado...");
-			printf("\n\n");
-			system("pause");
-			system("cls");	
-			fclose(arch_estudiantes);
-		}
-	}
-	
+
 }
+	
+
 
 void Modulo_Socios_Estudiantes_EliminarEstudiante()
 {
@@ -3958,11 +3975,12 @@ void Modulo_Socios_Profesionales_ListarProfesionales()
 				
 				printf("PROFESIONAL [%d]", i+1);
 			
-					printf("\n\tID: %s", Reg_Profesionales.id);
+					printf("\n\n\tID: %s", Reg_Profesionales.id);
 					printf("\n\tApellido y nombre: %s", Reg_Profesionales.apeYNom);
 					printf("\n\tDNI: %s", Reg_Profesionales.dni);	
-					printf("\n\tTelefono: %s", Reg_Profesionales.telefono);				
-					printf("\n\n\n");
+					printf("\n\tTelefono: %s", Reg_Profesionales.telefono);
+					printf("\n\n------------------------------------------------------------------");				
+					printf("\n\n");
 				
 				i++;	
 			}
@@ -4398,45 +4416,60 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 		string dni = {NULL};
 		string telefono = {NULL};
 				
-		bool bandera = false;
-		bool band_id = false;	
-		bool band_apeYNom = false;
-		bool band_telefono = false;
-		bool band_dni = false;
+		bool bandera = NULL;
+		bool band_id = NULL;	
+		bool band_apeYNom = NULL;
+		bool band_telefono = NULL;
+		bool band_dni = NULL;
 	
 		// ------------ BUSQUEDA DEL ID DEL PROFESIONAL EN EL ARCHIVO ------------
+			
+			do
+			{
+				bandera = NULL;
+						
+				system("cls");
+				printf("-- EDITAR SOCIO PROFESIONAL --");
+				printf("\n\n(Si desea cancelar, escriba 'salir')");
+				printf("\n\n\tINGRESE ID DEL PROFESIONAL A EDITAR: ");
+				_flushall();
+				gets(target);
+				
+				rewind(arch_profesionales);
+				fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+				
+				while(!feof(arch_profesionales) && bandera == false)
+				{
+					if( strcmp(target, Reg_Profesionales.id) == 0 && Reg_Profesionales.borrado == false)
+					{
+						bandera = true;
+						fseek(arch_profesionales, (long)-sizeof(Reg_Profesionales), SEEK_CUR);
+					}
+					
+					if(bandera == false)
+					{
+						fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);					
+					}
 		
-			system("cls");
-			printf("INGRESE ID DE PROFESIONAL A EDITAR: ");
-			_flushall();
-			gets(target);
-			
-			rewind(arch_profesionales);
-			fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
-			
-			while(!feof(arch_profesionales) && bandera == false)
-			{
-				if( strcmp(target, Reg_Profesionales.id) == 0 && Reg_Profesionales.borrado == false)
+				}			
+					
+				if(bandera == true)
 				{
-					bandera = true;
-					fseek(arch_profesionales, (long)-sizeof(Reg_Profesionales), SEEK_CUR);
+					system("cls");
+					printf("Se encontro el profesional exitosamente...");
+					printf("\n\n");
+					system("pause");
+					system("cls");
 				}
-				
-				if(bandera == false)
+				else
 				{
-					fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);					
+					system("cls");
+					printf("No se encontro el codigo del profesional ingresado...");
+					printf("\n\n");
+					system("pause");
 				}
-	
-			}			
-				
-			if(bandera == true)
-			{
-				system("cls");
-				printf("Se encontro el profesional exitosamente...");
-				printf("\n\n");
-				system("pause");
-				system("cls");
-			
+			}
+			while(bandera == false);
 		// ---------------------------------------------------------------------		
 		
 				do
@@ -4455,6 +4488,8 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 							
 							// Luego de ingresar el codigo en el case 4, si el codigo es incorrecto, 
 							//se tiene que volver a recorrer el archivo para volver a coincidir con el target anterior.
+							
+							arch_profesionales = fopen("Profesionales.dat", "r+b");
 							
 							rewind(arch_profesionales);
 							fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
@@ -4745,19 +4780,9 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 					}
 					while(true);					
 			}
-			
-		else
-		{
-			system("cls");
-			printf("No se encontro el ID del profesional ingresado...");
-			printf("\n\n");
-			system("pause");
-			system("cls");
-			fclose(arch_profesionales);	
-		}
-	}
-		
 }
+		
+
 
 void Modulo_Socios_Profesionales_EliminarProfesional()
 {
