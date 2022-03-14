@@ -6940,6 +6940,7 @@ void Modulo_Prestamos_Libros_Editar()
 		char opcion = NULL;
 		int cantidad = NULL;
 		int nuevaCantidad = NULL;
+		int aux_cantidad = NULL;
 		
 		string target = {NULL};
 		string codigo = {NULL};
@@ -7107,6 +7108,7 @@ void Modulo_Prestamos_Libros_Editar()
 											system("pause");
 											
 											Reg_Libros.existencias = nuevaCantidad - cantidad;
+											aux_cantidad = Reg_Libros.existencias;
 											
 											printf("Nueva cantidad del libro: %d\n\n", Reg_Libros.existencias);
 											system("pause");
@@ -7167,17 +7169,7 @@ void Modulo_Prestamos_Libros_Editar()
 															{
 																if(strcmp(Reg_Prestamos_L.cod_libro, Reg_Libros.codigo) == 0 && Reg_Libros.borrado == false)
 																{
-																	libro_encontrado = true;
-																	printf("Cantidad actual del libro: %d\n\n", Reg_Libros.existencias);
-																	system("pause");
-																	printf("Cantidad actual del prestamo: %d\n\n", Reg_Prestamos_L.cantidad);
-																	system("pause");
-																	nuevaCantidad = Reg_Libros.existencias + Reg_Prestamos_L.cantidad;
-																	printf("Nueva cantidad del libro: %d\n\n", Reg_Libros.existencias);
-																	system("pause");
-																	Reg_Libros.existencias = nuevaCantidad - cantidad;	
-																	printf("Nueva cantidad del libro: %d\n\n", Reg_Libros.existencias);
-																	system("pause");															
+																	libro_encontrado = true;															
 																	fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
 																	break;
 																}
@@ -7186,7 +7178,7 @@ void Modulo_Prestamos_Libros_Editar()
 																	fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 															}
 															
-															
+															Reg_Libros.existencias = aux_cantidad;
 															fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 															fclose(arch_libros);
 														}
@@ -9215,6 +9207,8 @@ void Modulo_Prestamos_Objetos_Editar()
 	// ---- APERTURA Y COMPROBACION DE ERRORES EN EL ARCHIVO ----
 	
 		FILE *arch_prestamos_o;
+		FILE *arch_objetos;
+		
 		arch_prestamos_o = fopen("Prestamos_O.dat", "r+b");
 			
 		if(arch_prestamos_o == NULL)
@@ -9231,9 +9225,12 @@ void Modulo_Prestamos_Objetos_Editar()
 	else
 	{
 		Prestamos_Objetos Reg_Prestamos_O;
+		Objetos Reg_Objetos;
 		
 		char opcion = NULL;
 		int cantidad = NULL;
+		int aux_cantidad = NULL;
+		int nuevaCantidad = NULL;
 		
 		string target = {NULL};
 		string codigo = {NULL};
@@ -9242,7 +9239,9 @@ void Modulo_Prestamos_Objetos_Editar()
 		bool bandera = NULL;
 		bool band_codigo = NULL;	
 		bool band_cantidad = NULL;
-	
+		bool objeto_encontrado = NULL;
+		
+		
 		// ------------ BUSQUEDA DEL ID DEL PROFESIONAL EN EL ARCHIVO ------------
 		
 			system("cls");
@@ -9287,14 +9286,16 @@ void Modulo_Prestamos_Objetos_Editar()
 							// Luego de ingresar el codigo en el case 4, si el codigo es incorrecto, 
 							//se tiene que volver a recorrer el archivo para volver a coincidir con el target anterior.
 							
+							arch_prestamos_o = fopen("Prestamos_O.dat", "r+b");
+							
 							rewind(arch_prestamos_o);
 							fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
 							
-							bandera = false;
+							bandera = NULL;
 							
 							while(!feof(arch_prestamos_o) && bandera == false)
 							{
-								if( strcmp(target, Reg_Prestamos_O.codigo) == 0 )
+								if( strcmp(target, Reg_Prestamos_O.codigo) == 0 && Reg_Prestamos_O.borrado == false )
 								{
 									bandera = true;
 									fseek(arch_prestamos_o, (long)-sizeof(Reg_Prestamos_O), SEEK_CUR);
@@ -9348,15 +9349,61 @@ void Modulo_Prestamos_Objetos_Editar()
 										system("cls");
 										printf("INGRESE CANTIDAD: ");
 										scanf("%d", &cantidad);
-																
+										
+										arch_objetos = fopen("Objetos.dat", "r+b");
+											
+										if(arch_objetos != NULL)
+										{
+											objeto_encontrado = NULL;
+											rewind(arch_objetos);
+											fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+											
+											while(!feof(arch_objetos) && objeto_encontrado == false)
+											{
+												if(strcmp(Reg_Prestamos_O.objeto, Reg_Objetos.nombre) == 0 && Reg_Objetos.borrado == false)
+												{
+													objeto_encontrado = true;
+													break;
+												}
+												
+												if(objeto_encontrado == false)
+													fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+											}
+											
+											printf("Cantidad actual del objetos: %d\n\n", Reg_Objetos.existencias);
+											system("pause");
+											
+											printf("Cantidad actual del prestamo: %d\n\n", Reg_Prestamos_O.cantidad);
+											system("pause");
+											
+											nuevaCantidad = Reg_Objetos.existencias + Reg_Prestamos_O.cantidad;
+											
+											printf("Nueva cantidad del objetos: %d\n\n", nuevaCantidad);
+											system("pause");
+											
+											Reg_Objetos.existencias = nuevaCantidad - cantidad;
+											aux_cantidad = Reg_Objetos.existencias;
+											
+											printf("Nueva cantidad del objetos: %d\n\n", Reg_Objetos.existencias);
+											system("pause");
+											
+											if(nuevaCantidad < 0)
+											{
+												system("cls");
+												printf("Cantindad incorrecta.");
+												printf("\n\n");
+												system("pause");
+												cantidad = NULL;
+											}
+										}													
 										break;
 									}																														
 							case '3':
 									{
 										// ------ CARGA DE DATOS EN EL REGISTRO ------
 										
-											band_codigo = false;	
-											band_cantidad = false;
+											band_codigo = NULL;	
+											band_cantidad = NULL;
 											
 											if( strlen(codigo) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
 											{
@@ -9368,20 +9415,48 @@ void Modulo_Prestamos_Objetos_Editar()
 												system("pause");					
 											}
 											
-											if( cantidad >= 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
+											if( cantidad > 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
 											{
 												band_cantidad = true;
+												Reg_Prestamos_O.cantidad = cantidad;
 											}
-																																												
-												
+																																																						
 										// -------------------------------------------	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 										
 										// ----------------------------------------------- CARGA DEL REGISTRO EN EL ARCHIVO -----------------------------------------------
 										
-											if( band_codigo == true)
+											if(band_codigo == true || band_cantidad == true)
 											{
-												if(band_cantidad == true)		
-												{
+													if(band_cantidad == true)
+													{
+														arch_objetos = fopen("Objetos.dat", "r+b");
+														
+														if(arch_objetos != NULL)
+														{
+															objeto_encontrado = NULL;
+															rewind(arch_objetos);
+															fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+															
+															while(!feof(arch_objetos) && objeto_encontrado == false)
+															{
+																if(strcmp(Reg_Prestamos_O.objeto, Reg_Objetos.nombre) == 0 && Reg_Objetos.borrado == false)
+																{
+																	objeto_encontrado = true;															
+																	fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
+																	break;
+																}
+																
+																if(objeto_encontrado == false)
+																	fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+															}
+															
+															Reg_Objetos.existencias = aux_cantidad;
+															
+															fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+															fclose(arch_objetos);
+														}
+													}
+													
 													fwrite(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
 																									
 													system("cls");
@@ -9393,26 +9468,18 @@ void Modulo_Prestamos_Objetos_Editar()
 													for(int i=0; i<strlen(codigo); i++) // Revalorizacion de cadenas a un valor nulo.
 														codigo[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el objeto.
 													
-													cantidad = NULL;	
-												}
-												else
-												{
-													system("cls");
-													printf("La cantidad ingresada es incorrecta.");	
-													printf("\n\n");
-													system("pause");
-												}			
+													cantidad = NULL;		
 								
 											}
-											else
+											
+											if(band_codigo == false && band_cantidad == false)
 											{
 												system("cls");
 												printf("No se edito ningun campo del profesional ingresado...");	
 												printf("\n\n");
 												system("pause");
 												system("cls");
-											}
-								
+											}								
 										// --------------------------------------------------------------------------------------------------------------------------------
 											
 										break;
@@ -9445,11 +9512,9 @@ void Modulo_Prestamos_Objetos_Editar()
 											rewind(arch_prestamos_o);
 											fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
 											
-											bandera = false;
-											
 											while(!feof(arch_prestamos_o) && bandera == false)
 											{
-												if( strcmp(target, Reg_Prestamos_O.codigo) == 0 && Reg_Prestamos_O.borrado == false)
+												if( strcmp(target, Reg_Prestamos_O.codigo) == 0 && Reg_Prestamos_O.borrado == false )
 												{
 													bandera = true;
 													fseek(arch_prestamos_o, (long)-sizeof(Reg_Prestamos_O), SEEK_CUR);
