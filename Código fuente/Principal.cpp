@@ -181,6 +181,7 @@ main()
 	
 	char opcion = NULL;
 	
+
 	do
 	{
 		system("cls");
@@ -609,9 +610,9 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 											rewind(arch_objetos);
 											fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);			
 											
-											while(!feof(arch_objetos) && codigo_existente_o == true)
-											{
-												if(strcmp(codigo, Reg_Objetos.codigo))
+											while(!feof(arch_objetos) && codigo_existente_o == false)
+											{									
+												if(strcmp(codigo, Reg_Objetos.codigo) == 0 && Reg_Objetos.borrado == false)
 												{
 													codigo_existente_o = true;
 													break;
@@ -783,6 +784,7 @@ void Modulo_Biblioteca_Libros_NuevoLibro()
 					 				{
 										fseek(arch_libros, 2, SEEK_END);
 										Reg_Libros.prestado = NULL;
+										Reg_Libros.borrado = NULL;
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 										
 										system("cls");
@@ -1819,9 +1821,9 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 										rewind(arch_objetos);
 										fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);			
 										
-										while(!feof(arch_objetos) && codigo_existente_o == true)
+										while(!feof(arch_objetos) && codigo_existente_o == false)
 										{
-											if(strcmp(codigo, Reg_Objetos.codigo))
+											if(strcmp(codigo, Reg_Objetos.codigo) == 0 && Reg_Objetos.borrado == false)
 											{
 												codigo_existente_o = true;
 												break;
@@ -1954,6 +1956,7 @@ void Modulo_Biblioteca_Objetos_NuevoObjeto()
 					 				{
 										fseek(arch_objetos, 2, SEEK_END);
 										Reg_Objetos.prestado = NULL;
+										Reg_Objetos.borrado = NULL;
 										fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 										
 										system("cls");
@@ -3554,16 +3557,19 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 							
 							arch_estudiantes = fopen("Estudiantes.dat", "r+b");
 							
-							rewind(arch_estudiantes);
-							fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
-							
 							bandera = NULL;
 							band_prestado = NULL;
 							rewind(arch_estudiantes);
 							fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
 							
+							printf("target es: %s\n\n", target);
+							system("pause");
+							
 							while(!feof(arch_estudiantes) && bandera == false)
 							{
+								printf("Codigo actual: %s\n\n", Reg_Estudiantes.id);
+								system("pause");
+								
 								if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.prestamo > 0 && Reg_Estudiantes.borrado == false)
 								{
 									band_prestado = true;
@@ -3574,12 +3580,11 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 								{
 									bandera = true;
 									fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
+									break;
 								}
 								
 								if(bandera == false)
-								{
 									fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);					
-								}	
 							}
 						
 							printf("\n\n\tID: %s", Reg_Estudiantes.id);
@@ -3674,11 +3679,11 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 									{
 										// ------ CARGA DE DATOS EN EL REGISTRO ------
 										
-											band_id = false;	
-											band_apeYNom = false;
-											band_turno = false;
-											band_curso = false;
-											band_dni = false;
+											band_id = NULL;	
+											band_apeYNom = NULL;
+											band_turno = NULL;
+											band_curso = NULL;
+											band_dni = NULL;
 											
 											if( strlen(id) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
 											{
@@ -3710,9 +3715,12 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 										// -------------------------------------------	
 										
 										// ----------------------------------------------- CARGA DEL REGISTRO EN EL ARCHIVO -----------------------------------------------
-										
+											string auxiliar = {NULL};
+											
 											if( band_id == true || band_apeYNom == true || band_turno == true || band_curso == true || band_dni == true)
 											{
+												strcpy(auxiliar, target);
+												
 												fwrite(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);	
 												
 												system("cls");
@@ -3735,7 +3743,37 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 												
 												for(int i=0; i<strlen(dni); i++)
 													dni[i] = NULL;
-											}
+											
+											fclose(arch_estudiantes);
+													
+											arch_estudiantes = fopen("Estudiantes.dat", "r+b");
+											
+											bandera = NULL;
+											band_prestado = NULL;
+											rewind(arch_estudiantes);
+											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											
+											while(!feof(arch_estudiantes) && bandera == false)
+											{
+												if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.prestamo > 0 && Reg_Estudiantes.borrado == false)
+												{
+													band_prestado = true;
+													break;
+												}
+												
+												if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.prestamo == 0 && Reg_Estudiantes.borrado == false)
+												{
+													bandera = true;
+													fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
+												}
+												
+												if(bandera == false)
+												{
+													fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);					
+												}	
+												
+												strcpy(target, auxiliar);
+											}																								}
 											else
 											{
 												system("cls");
@@ -6916,10 +6954,12 @@ void Modulo_Prestamos_Libros_Editar()
 		if(arch_prestamos_l == NULL)
 		{
 			system("cls");
-			printf("ERROR. No se pudo abrir el archivo 'Prestamos_O.dat'");
+			printf("ERROR. No se pudo abrir el archivo 'Prestamos_L.dat'");
 			printf("\n\n(No hay ningun prestamo de objetos en la base de datos)");
 			printf("\n\n");
 			system("pause");
+			
+			Modulo_Prestamos_Libros();
 		}
 		if(arch_libros == NULL)
 		{
@@ -6927,7 +6967,9 @@ void Modulo_Prestamos_Libros_Editar()
 			printf("ERROR. No se pudo abrir el archivo 'Libros.dat'");
 			printf("\n\n(No hay ningun libro en la base de datos)");
 			printf("\n\n");
-			system("pause");			
+			system("pause");		
+			
+			Modulo_Prestamos_Libros();	
 		}
 	
 	// ----------------------------------------------------------	
@@ -6954,10 +6996,22 @@ void Modulo_Prestamos_Libros_Editar()
 	
 		// ------------ BUSQUEDA DEL ID DEL PROFESIONAL EN EL ARCHIVO ------------
 		
+		do
+		{
+			bandera = NULL;
+			
 			system("cls");
-			printf("INGRESE EL CODIGO DEL PRESTAMO A EDITAR: ");
+			printf("-- EDICION DE UN PRESTAMO --");
+			printf("(Si desea cancelar, escribla 'salir')");
+			printf("\n\n\tINGRESE EL CODIGO DEL PRESTAMO A EDITAR: ");
 			_flushall();
 			gets(target);
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_prestamos_l);
+				Modulo_Prestamos_Libros;
+			}
 			
 			rewind(arch_prestamos_l);
 			fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
@@ -6981,7 +7035,17 @@ void Modulo_Prestamos_Libros_Editar()
 				printf("\n\n");
 				system("pause");
 				system("cls");
-			
+			}
+			else if(bandera == false)
+			{
+				system("cls");
+				printf("No se encontro el codigo del prestamo. Ingrese nuevamente...");
+				printf("\n\n");
+				system("pause");
+				system("cls");
+			}
+		}
+		while(bandera == false);
 		// ---------------------------------------------------------------------		
 		
 				do
@@ -6995,6 +7059,8 @@ void Modulo_Prestamos_Libros_Editar()
 							
 							// Luego de ingresar el codigo en el case 4, si el codigo es incorrecto, 
 							//se tiene que volver a recorrer el archivo para volver a coincidir con el target anterior.
+							
+							arch_prestamos_l = fopen("Prestamos_L", "r+b");
 							
 							rewind(arch_prestamos_l);
 							fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
@@ -7155,8 +7221,7 @@ void Modulo_Prestamos_Libros_Editar()
 											if(band_codigo == true || band_cantidad == true)
 											{
 													if(band_cantidad == true)
-													{
-														
+													{		
 														arch_libros = fopen("Libros.dat", "r+b");
 														
 														if(arch_libros != NULL)
@@ -7179,6 +7244,7 @@ void Modulo_Prestamos_Libros_Editar()
 															}
 															
 															Reg_Libros.existencias = aux_cantidad;
+															
 															fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 															fclose(arch_libros);
 														}
@@ -7311,17 +7377,6 @@ void Modulo_Prestamos_Libros_Editar()
 					}
 					while(true);					
 			}
-			
-		else
-		{
-			system("cls");
-			printf("No se encontro el codigo del prestamo ingresado...");
-			printf("\n\n");
-			system("pause");
-			system("cls");
-			fclose(arch_prestamos_l);	
-		}
-	}
 		
 }
 
@@ -7338,7 +7393,7 @@ void Modulo_Prestamos_Libros_Completar()
 	
 	if(arch_prestamos_l == NULL)
 	{
-		system("pause");
+		system("cls");
 		printf("ERROR: El archivo 'Prestamos_L.dat' no existe");
 		printf("\n\n(Debe registrar al menos un prestamo de objeto).");
 		printf("\n\n");
@@ -7400,7 +7455,8 @@ void Modulo_Prestamos_Libros_Completar()
 				
 				if(band_encontrado == false)
 					fread(&Reg_Prestamos_L, sizeof(Reg_Prestamos_L), 1, arch_prestamos_l);
-			}		
+			}	
+				
 			if(band_encontrado == false)
 			{
 				system("cls");
@@ -7422,7 +7478,6 @@ void Modulo_Prestamos_Libros_Completar()
 			if(strcmp(Reg_Prestamos_L.cod_libro, Reg_Libros.codigo) == 0 && Reg_Libros.borrado == false)
 			{
 				band_encontrado = true;	
-				band_profesional = true;
 				fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);		
 				break;
 			}
@@ -7470,6 +7525,7 @@ void Modulo_Prestamos_Libros_Completar()
 				if(strcmp(Reg_Prestamos_L.idprestatario, Reg_Profesionales.id) == 0 && Reg_Profesionales.borrado == false)
 				{
 					band_encontrado = true;
+					band_profesional = true;
 					fseek(arch_profesionales, (long)-sizeof(Reg_Profesionales), SEEK_CUR);	
 					break;	
 				}
@@ -9210,6 +9266,7 @@ void Modulo_Prestamos_Objetos_Editar()
 		FILE *arch_objetos;
 		
 		arch_prestamos_o = fopen("Prestamos_O.dat", "r+b");
+		arch_objetos = fopen("Objetos.dat", "r+b");
 			
 		if(arch_prestamos_o == NULL)
 		{
@@ -9218,6 +9275,18 @@ void Modulo_Prestamos_Objetos_Editar()
 			printf("\n\n(No hay ningun prestamo de objetos en la base de datos)");
 			printf("\n\n");
 			system("pause");
+			
+			Modulo_Prestamos_Objetos();
+		}
+		if(arch_objetos == NULL)
+		{
+			system("cls");
+			printf("ERROR. NO se pudo abrir el archivo 'Objetos.dat'");
+			printf("\n\n(No hay ningun prestamo de objetos en la base de datos)");
+			printf("\n\n");
+			system("pause");
+			
+			Modulo_Prestamos_Objetos();
 		}
 	
 	// ----------------------------------------------------------	
@@ -9243,11 +9312,23 @@ void Modulo_Prestamos_Objetos_Editar()
 		
 		
 		// ------------ BUSQUEDA DEL ID DEL PROFESIONAL EN EL ARCHIVO ------------
-		
+		do
+		{
+			bandera = NULL;
+			
 			system("cls");
-			printf("INGRESE EL CODIGO DEL PRESTAMO A EDITAR: ");
+			printf("-- EDICION DEL PRESTAMO --");
+			printf("\n\n(Si desea cancelar, escriba 'salir').");
+			printf("\n\n\tINGRESE EL CODIGO DEL PRESTAMO A EDITAR: ");
 			_flushall();
 			gets(target);
+			
+			if(strcmp(target, "salir") == 0)
+			{
+				fclose(arch_prestamos_o);
+				
+				Modulo_Prestamos_Objetos();
+			}
 			
 			rewind(arch_prestamos_o);
 			fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
@@ -9270,8 +9351,17 @@ void Modulo_Prestamos_Objetos_Editar()
 				printf("Se encontro el prestamo exitosamente...");
 				printf("\n\n");
 				system("pause");
+			}			
+			if(bandera == false)
+			{
 				system("cls");
+				printf("No se encontro el codigo del prestamo ingresado. Ingrese nuevamente...");
+				printf("\n\n");
+				system("pause");			
+			}
 			
+		}
+		while(bandera == false);
 		// ---------------------------------------------------------------------		
 		
 				do
@@ -9395,7 +9485,8 @@ void Modulo_Prestamos_Objetos_Editar()
 												system("pause");
 												cantidad = NULL;
 											}
-										}													
+										}
+																							
 										break;
 									}																														
 							case '3':
@@ -9580,17 +9671,6 @@ void Modulo_Prestamos_Objetos_Editar()
 						}	
 					}
 					while(true);					
-			}
-			
-		else
-		{
-			system("cls");
-			printf("No se encontro el codigo del prestamo ingresado...");
-			printf("\n\n");
-			system("pause");
-			system("cls");
-			fclose(arch_prestamos_o);	
-		}
 	}
 			
 }
@@ -9609,7 +9689,6 @@ void Modulo_Prestamos_Objetos_Completar()
 	if(arch_prestamos_o == NULL)
 	{
 		system("cls");
-		system("pause");
 		printf("ERROR: El archivo 'Prestamos_O.dat' no existe");
 		printf("\n\n(Debe registrar al menos un prestamo de objeto).");
 		printf("\n\n");
@@ -9665,18 +9744,17 @@ void Modulo_Prestamos_Objetos_Completar()
 					break;
 				}
 				
-				if( band_encontrado == false )
+				if(band_encontrado == false)
 					fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
 			}
 			
-			if( band_encontrado == false )
+			if(band_encontrado == false)
 			{
 				system("cls");
 				printf("No se encontro el codigo del prestamo. Ingrese nuevamente...");
 				printf("\n\n");
 				system("pause");
 			}
-			
 		}
 		while(band_encontrado == false);
 		
@@ -9688,7 +9766,8 @@ void Modulo_Prestamos_Objetos_Completar()
 		band_encontrado = NULL;
 		while(!feof(arch_objetos) && band_encontrado == false)
 		{
-			if(strcmp(Reg_Prestamos_O.objeto, Reg_Objetos.nombre) == 0)
+			
+			if(strcmp(Reg_Prestamos_O.objeto, Reg_Objetos.nombre) == 0 && Reg_Objetos.borrado == false)
 			{
 				band_encontrado = true;
 				fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR); // Cambio de existencias.
@@ -9779,6 +9858,7 @@ void Modulo_Prestamos_Objetos_Completar()
 				bandera = NULL;
 				
 				fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+				fclose(arch_objetos);
 				
 				Reg_Prestamos_O.borrado = true;
 				fwrite(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
@@ -9817,9 +9897,6 @@ void Modulo_Prestamos_Objetos_Completar()
 					remove("Prestamos_O.dat");
 					rename("auxiliar.dat", "Prestamos.O.dat");
 					remove("auxiliar.dat");
-					
-					fwrite(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
-					fclose(arch_objetos);
 					
 				// -----------------------------------------------------------------------------------		
 			}
