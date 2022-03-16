@@ -1044,12 +1044,6 @@ void Modulo_Biblioteca_Libros_EditarLibro()
 					bandera = NULL;
 					while(!feof(arch_libros) && bandera == false)
 					{
-						if( strcmp(target, Reg_Libros.codigo) == 0 && Reg_Libros.prestado > 0 && Reg_Libros.borrado == false)
-						{
-							band_prestado = true;
-							break;
-						}
-						
 						if( strcmp(target, Reg_Libros.codigo) == 0 && Reg_Libros.prestado == 0 && Reg_Libros.borrado == 0)
 						{
 							fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
@@ -1166,12 +1160,32 @@ void Modulo_Biblioteca_Libros_EditarLibro()
 							{
 								// ------ CARGA DE DATOS EN EL REGISTRO ------
 								
-									band_codigo = false;
-									band_titulo = false;
-									band_editorial = false;
-									band_seccion = false;
-									band_autor = false;
-									band_existencias = false;
+									fclose(arch_libros);
+									arch_libros = fopen("Libros.dat", "r+b");
+									
+									rewind(arch_libros);
+									fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);	
+											
+									bandera = NULL;
+									while(!feof(arch_libros) && bandera == false)
+									{
+										if( strcmp(target, Reg_Libros.codigo) == 0 && Reg_Libros.prestado == 0 && Reg_Libros.borrado == 0)
+										{
+											fseek(arch_libros, (long)-sizeof(Reg_Libros), SEEK_CUR);
+											bandera = true;	
+											break;
+										}					
+						
+										if (bandera == false)
+											fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);	
+									}								
+												
+									band_codigo = NULL;
+									band_titulo = NULL;
+									band_editorial = NULL;
+									band_seccion = NULL;
+									band_autor = NULL;
+									band_existencias = NULL;
 									
 									if( strlen(codigo) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
 									{
@@ -1203,6 +1217,8 @@ void Modulo_Biblioteca_Libros_EditarLibro()
 										Reg_Libros.existencias = existencias;
 										band_existencias = true;
 									}
+									
+									strcpy(auxiliar, target);
 										
 								// -------------------------------------------	
 								
@@ -1211,6 +1227,7 @@ void Modulo_Biblioteca_Libros_EditarLibro()
 									if( band_codigo == true || band_titulo == true || band_editorial == true || band_seccion == true || band_autor == true || band_existencias == true )
 									{
 										fwrite(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);	
+										fclose(arch_libros);
 										
 										system("cls");
 										printf("Se edito el libro exitosamente...");
@@ -1218,6 +1235,9 @@ void Modulo_Biblioteca_Libros_EditarLibro()
 										system("pause");
 										system("cls");
 										
+										if( strlen(codigo) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
+											strcpy(auxiliar, codigo);
+								
 										for(int i=0; i<strlen(codigo); i++) // Revalorizacion de cadenas a un valor nulo.
 											codigo[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el libro.										
 										
@@ -1232,6 +1252,8 @@ void Modulo_Biblioteca_Libros_EditarLibro()
 										
 										for(int i=0; i<strlen(autor); i++)
 											autor[i] = NULL;
+											
+										strcpy(target, auxiliar);
 									}
 									else
 									{
@@ -1603,10 +1625,13 @@ void Modulo_Biblioteca_Libros_BuscarLibro()
 		
 		string target = {NULL};		
 		
-		bool bandera = false;
+		bool bandera = NULL;
 		
 		// ------------ BUSQUEDA DEL CODIGO DEL LIBRO EN EL ARCHIVO ------------
-		
+		do
+		{
+			bandera = NULL;
+			
 			system("cls");
 			printf("-- BUSQUEDA DE UN LIBRO --");
 			printf("\n\n(Si desea cancelar, escriba 'salir')");	
@@ -1635,36 +1660,36 @@ void Modulo_Biblioteca_Libros_BuscarLibro()
 						
 		// ---------------------------------------------------------------------
 		
-		if(bandera == true)
-		{
-			system("cls");
-			printf("Se ha encontrado el libro exitosamente...");
+			if(bandera == true)
+			{
+				system("cls");
+				printf("Se ha encontrado el libro exitosamente...");
+				
+				printf("\n\n\tCodigo: %s", Reg_Libros.codigo);
+				printf("\n\tTitulo: %s",Reg_Libros.titulo);
+				printf("\n\tEditorial: %s",Reg_Libros.editorial);
+				printf("\n\tSeccion: %s", Reg_Libros.seccion);
+				printf("\n\tAutor: %s", Reg_Libros.autor);
+				printf("\n\tExistencias: %d", Reg_Libros.existencias);	
+				
+				printf("\n\n");
+				system("pause");
+				system("cls");	
+				
+				fclose(arch_libros);	
+			}
+			else
+			{
+				system("cls");
+				printf("No se encontro el codigo del libro ingresado. Ingrese nuevamente.");
+				printf("\n\nVolviendo a pantalla anterior...");
+				printf("\n\n");
+				system("pause");
+				system("cls");
 			
-			printf("\n\n\tCodigo: %s", Reg_Libros.codigo);
-			printf("\n\tTitulo: %s",Reg_Libros.titulo);
-			printf("\n\tEditorial: %s",Reg_Libros.editorial);
-			printf("\n\tSeccion: %s", Reg_Libros.seccion);
-			printf("\n\tAutor: %s", Reg_Libros.autor);
-			printf("\n\tExistencias: %d", Reg_Libros.existencias);	
-			
-			printf("\n\n");
-			system("pause");
-			system("cls");	
-			
-			fclose(arch_libros);	
+			}
 		}
-		else
-		{
-			system("cls");
-			printf("No se encontro el codigo del libro ingresado...");
-			printf("\n\nVolviendo a pantalla anterior...");
-			printf("\n\n");
-			system("pause");
-			system("cls");
-			
-			fclose(arch_libros);	
-			Modulo_Biblioteca_Libros(); // Retornar a la funcion
-		}
+		while(bandera == false);
 	}
 }
 
@@ -2191,12 +2216,6 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 							bandera = NULL;
 							while(!feof(arch_objetos) && bandera == false)
 							{
-								if( strcmp(target, Reg_Objetos.codigo) == 0 && Reg_Objetos.prestado > 0 && Reg_Objetos.borrado == false)
-								{
-									band_prestado = true;
-									break;
-								}
-								
 								if( strcmp(target, Reg_Objetos.codigo) == 0 && Reg_Objetos.prestado == 0 && Reg_Objetos.borrado == false)
 								{
 									fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
@@ -2270,6 +2289,26 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 									{
 										// ------ CARGA DE DATOS EN EL REGISTRO ------
 										
+											fclose(arch_objetos);
+											arch_objetos = fopen("Objetos.dat", "r+b");
+											
+											rewind(arch_objetos);
+											fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
+											
+											bandera = NULL;
+											while(!feof(arch_objetos) && bandera == false)
+											{
+												if( strcmp(target, Reg_Objetos.codigo) == 0 && Reg_Objetos.prestado == 0 && Reg_Objetos.borrado == false)
+												{
+													fseek(arch_objetos, (long)-sizeof(Reg_Objetos), SEEK_CUR);
+													bandera = true;	
+													break;
+												}					
+								
+												if (bandera == false)
+													fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);	
+											}										
+										
 											band_codigo = NULL;
 											band_nombre = NULL;
 											band_existencias = NULL;
@@ -2290,6 +2329,8 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 												Reg_Objetos.existencias = existencias;
 												band_existencias = true;
 											}
+											
+											strcpy(auxiliar, target);
 												
 										// -------------------------------------------	
 										
@@ -2305,38 +2346,18 @@ void Modulo_Biblioteca_Objetos_EditarObjeto()
 												system("pause");
 												system("cls");
 												
+												if( strlen(codigo) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
+													strcpy(auxiliar, codigo);
+												
 												for(int i=0; i<strlen(codigo); i++) // Revalorizacion de cadenas a un valor nulo.
 													codigo[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el objeto.
 												
 												for(int i=0; i<strlen(nombre); i++)
 													nombre[i] = NULL;
 												
-												existencias = 0;
+												existencias = NULL;	
 												
-												// -------------- EDICION DEL NOMBRE DE OBJETO EN ARCHIVO DE PRESTAMOS --------------
-												
-													arch_prestamos_o = fopen("Prestamos_O", "r+b");
-													
-													if(arch_prestamos_o != NULL)
-													{
-														rewind(arch_prestamos_o);
-														fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
-														
-														while(!feof(arch_prestamos_o) && objeto_encontrado == false)
-														{
-															if(strcmp(nombre, Reg_Prestamos_O.objeto) == 0)
-															{
-																objeto_encontrado = true;
-																break;	
-															}
-															
-															if(objeto_encontrado == false)
-																fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
-			
-														}	
-													}
-													
-												// ----------------------------------------------------------------------------------
+												strcpy(target, auxiliar);
 											}
 											else
 											{
@@ -2673,10 +2694,13 @@ void Modulo_Biblioteca_Objetos_BuscarObjeto()
 		
 		string target = {NULL};		
 		
-		bool bandera = false;
+		bool bandera = NULL;
 		
 		// ------------ BUSQUEDA DEL CODIGO DEL LIBRO EN EL ARCHIVO ------------
-		
+		do
+		{
+			bandera = NULL;
+			
 			system("cls");
 			printf("-- BUSQUEDA DE UN OBJETO --");
 			printf("\n\n(Si desea cancelar, escriba 'salir')");	
@@ -2704,35 +2728,34 @@ void Modulo_Biblioteca_Objetos_BuscarObjeto()
 			}
 						
 		// ---------------------------------------------------------------------
-		
-		if(bandera == true)
-		{
-			system("cls");
-			printf("Se ha encontrado el objeto exitosamente...");
 			
-			printf("\n\n\tCodigo: %s", Reg_Objetos.codigo);
-			printf("\n\tNombre: %s", Reg_Objetos.nombre);
-			printf("\n\tExistencias: %d", Reg_Objetos.existencias);	
-			
-			printf("\n\n");
-			system("pause");
-			system("cls");
-			
-			fclose(arch_objetos);		
-		}
-		else
-		{
-			system("cls");
-			printf("No se encontro el codigo del objeto ingresado...");
-			printf("\n\nVolviendo a pantalla anterior...");
-			printf("\n\n");
-			system("pause");
-			system("cls");
-			
-			fclose(arch_objetos);	
+			if(bandera == true)
+			{
+				system("cls");
+				printf("Se ha encontrado el objeto exitosamente...");
 				
-			Modulo_Biblioteca_Objetos(); // Retornar a la funcion
+				printf("\n\n\tCodigo: %s", Reg_Objetos.codigo);
+				printf("\n\tNombre: %s", Reg_Objetos.nombre);
+				printf("\n\tExistencias: %d", Reg_Objetos.existencias);	
+				
+				printf("\n\n");
+				system("pause");
+				system("cls");
+				
+				fclose(arch_objetos);		
+			}
+			else
+			{
+				system("cls");
+				printf("No se encontro el codigo del objeto ingresado. Ingrese nuevamente");
+				printf("\n\nVolviendo a pantalla anterior...");
+				printf("\n\n");
+				system("pause");
+				system("cls");
+			}
 		}
+		while(bandera == false);
+		
 	} // Cierre de if de archivo.
 }
 
@@ -3543,43 +3566,31 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 					opcion = NULL;
 					
 					system("cls");
-					printf("--MODULO DE SOCIOS/ESTUDIANTES/EDITAR ESTUDIANTE--");
+					printf("-- MODULO DE SOCIOS/ESTUDIANTES/EDITAR ESTUDIANTE --");
 					
 					// ------------------ MOSTRAR OBJETO INGRESADO ------------------
 						
-							/*posicion = ftell(arch_estudiantes);
+							posicion = ftell(arch_estudiantes);
 							printf("\n\nPosicion: %d\n\n", posicion);
-							system("pause");*/
-							
-							
+							system("pause");
+									
 							// Luego de ingresar el codigo en el case 4, si el codigo es incorrecto, 
 							//se tiene que volver a recorrer el archivo para volver a coincidir con el target anterior.
 							
 							arch_estudiantes = fopen("Estudiantes.dat", "r+b");
 							
 							bandera = NULL;
-							band_prestado = NULL;
 							rewind(arch_estudiantes);
 							fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
 							
-							printf("target es: %s\n\n", target);
-							system("pause");
+							/*printf("target es: %s\n\n", target);
+							system("pause");*/
 							
 							while(!feof(arch_estudiantes) && bandera == false)
-							{
-								printf("Codigo actual: %s\n\n", Reg_Estudiantes.id);
-								system("pause");
-								
-								if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.prestamo > 0 && Reg_Estudiantes.borrado == false)
-								{
-									band_prestado = true;
-									break;
-								}
-								
+							{			
 								if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.prestamo == 0 && Reg_Estudiantes.borrado == false)
 								{
 									bandera = true;
-									fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
 									break;
 								}
 								
@@ -3593,9 +3604,9 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 							printf("\n\tCurso: %s", Reg_Estudiantes.curso);
 							printf("\n\tDNI: %s", Reg_Estudiantes.dni);
 							
-							/*posicion = ftell(arch_estudiantes);
+							posicion = ftell(arch_estudiantes);
 							printf("\n\nPosicion: %d\n\n", posicion);
-							system("pause");*/
+							system("pause");
 							
 						// -------------------------------------------------------------
 							
@@ -3679,6 +3690,40 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 									{
 										// ------ CARGA DE DATOS EN EL REGISTRO ------
 										
+											fclose(arch_estudiantes);		
+											arch_estudiantes = fopen("Estudiantes.dat", "r+b");
+											
+											/*printf("Target antes de guardar los cambios: %s\n\n", target);
+											system("pause");*/
+											
+											bandera = NULL;
+											rewind(arch_estudiantes);
+											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
+											
+											while(!feof(arch_estudiantes) && bandera == false)
+											{							
+												/*printf("Reg_Estudiantes.id es: %s\n\n", Reg_Estudiantes.id);
+												system("pause");
+												
+												printf("Reg_Estudiantes.prestamo es: %d\n\n", Reg_Estudiantes.prestamo);
+												system("pause");
+												
+												if(Reg_Estudiantes.borrado == false)
+													printf("Reg_Estudiantes.borrado es: falso");
+												else if(Reg_Estudiantes.borrado == true)
+													printf("Reg_Estudiantes.borrado es: verdadero");
+												system("pause");*/	
+														
+												if(strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.prestamo == 0 && Reg_Estudiantes.borrado == false)
+												{
+													bandera = true;
+													fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
+												}
+												
+												if(bandera == false)
+													fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);					
+											}
+												
 											band_id = NULL;	
 											band_apeYNom = NULL;
 											band_turno = NULL;
@@ -3688,7 +3733,7 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 											if( strlen(id) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
 											{
 												strcpy(Reg_Estudiantes.id, id);
-												band_id = true;										
+												band_id = true;								
 											}
 											if( strlen(apeYNom) != 0 )
 											{
@@ -3710,18 +3755,16 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 												strcpy(Reg_Estudiantes.dni, dni);
 												band_dni = true;										
 											}
-																																												
-												
+																																											
+											strcpy(auxiliar, target);	
 										// -------------------------------------------	
 										
 										// ----------------------------------------------- CARGA DEL REGISTRO EN EL ARCHIVO -----------------------------------------------
-											string auxiliar = {NULL};
 											
 											if( band_id == true || band_apeYNom == true || band_turno == true || band_curso == true || band_dni == true)
-											{
-												strcpy(auxiliar, target);
-												
+											{												
 												fwrite(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);	
+												fclose(arch_estudiantes);
 												
 												system("cls");
 												printf("Se edito el estudiante exitosamente...");
@@ -3729,6 +3772,9 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 												system("pause");
 												system("cls");
 												
+												if( strlen(id) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
+													strcpy(auxiliar, id);																				
+													
 												for(int i=0; i<strlen(id); i++) // Revalorizacion de cadenas a un valor nulo.
 													id[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el objeto.
 												
@@ -3743,37 +3789,9 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 												
 												for(int i=0; i<strlen(dni); i++)
 													dni[i] = NULL;
-											
-											fclose(arch_estudiantes);
 													
-											arch_estudiantes = fopen("Estudiantes.dat", "r+b");
-											
-											bandera = NULL;
-											band_prestado = NULL;
-											rewind(arch_estudiantes);
-											fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);
-											
-											while(!feof(arch_estudiantes) && bandera == false)
-											{
-												if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.prestamo > 0 && Reg_Estudiantes.borrado == false)
-												{
-													band_prestado = true;
-													break;
-												}
-												
-												if( strcmp(target, Reg_Estudiantes.id) == 0 && Reg_Estudiantes.prestamo == 0 && Reg_Estudiantes.borrado == false)
-												{
-													bandera = true;
-													fseek(arch_estudiantes, (long)-sizeof(Reg_Estudiantes), SEEK_CUR);
-												}
-												
-												if(bandera == false)
-												{
-													fread(&Reg_Estudiantes, sizeof(Reg_Estudiantes), 1, arch_estudiantes);					
-												}	
-												
 												strcpy(target, auxiliar);
-											}																								}
+											}
 											else
 											{
 												system("cls");
@@ -3800,7 +3818,7 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 										
 										// --- REVALORIZACIÓN DE VARIABLES A UN VALOR NULO ---
 											 
-											Reg_Estudiantes.borrado = false;
+											Reg_Estudiantes.borrado = NULL;
 											
 											for(int i=0; i<strlen(id); i++) // Revalorizacion de cadenas a un valor nulo.
 												id[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el objeto.
@@ -3848,9 +3866,9 @@ void Modulo_Socios_Estudiantes_EditarEstudiante()
 											}									
 									
 											
-											/*posicion = ftell(arch_estudiantes);
+											posicion = ftell(arch_estudiantes);
 											printf("Posicion: %d\n\n", posicion);
-											system("pause");*/
+											system("pause");
 																								
 										// ---------------------------------------------------------------------
 										
@@ -4129,10 +4147,13 @@ void Modulo_Socios_Estudiantes_BuscarEstudiante()
 		
 		string target = {NULL};		
 		
-		bool bandera = false;
+		bool bandera = NULL;
 		
 		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
-		
+		do
+		{
+			bandera = NULL;
+			
 			system("cls");
 			printf("-- BUSQUEDA DE UN SOCIO --");
 			printf("\n\n(Si desea cancelar, escriba 'salir')");	
@@ -4161,35 +4182,34 @@ void Modulo_Socios_Estudiantes_BuscarEstudiante()
 						
 		// ---------------------------------------------------------------------
 		
-		if(bandera == true)
-		{
-			system("cls");
-			printf("Se ha encontrado el estudiante exitosamente...");
-			
-			printf("\n\n\tID: %s", Reg_Estudiantes.id);
-			printf("\n\tApellido y nombre: %s", Reg_Estudiantes.apeYNom);
-			printf("\n\tTurno: %s", Reg_Estudiantes.turno);
-			printf("\n\tCurso: %s", Reg_Estudiantes.curso);
-			printf("\n\tDNI: %s", Reg_Estudiantes.dni);
-			
-			printf("\n\n");
-			system("pause");
-			system("cls");	
-			
-			fclose(arch_estudiantes);	
+			if(bandera == true)
+			{
+				system("cls");
+				printf("Se ha encontrado el estudiante exitosamente...");
+				
+				printf("\n\n\tID: %s", Reg_Estudiantes.id);
+				printf("\n\tApellido y nombre: %s", Reg_Estudiantes.apeYNom);
+				printf("\n\tTurno: %s", Reg_Estudiantes.turno);
+				printf("\n\tCurso: %s", Reg_Estudiantes.curso);
+				printf("\n\tDNI: %s", Reg_Estudiantes.dni);
+				
+				printf("\n\n");
+				system("pause");
+				system("cls");	
+				
+				fclose(arch_estudiantes);	
+			}
+			else
+			{
+				system("cls");
+				printf("No se encontro el ID del estudiante ingresado...");
+				printf("\n\n");
+				system("pause");
+			}
 		}
-		else
-		{
-			system("cls");
-			printf("No se encontro el ID del estudiante ingresado...");
-			printf("\n\n");
-			system("pause");
-			system("cls");
-			
-			fclose(arch_estudiantes);		
-			Modulo_Socios_Estudiantes(); // Retornar a la funcion
-		}
-	}	
+		while(bandera == false);	
+	}
+
 }
 
 //
@@ -4533,10 +4553,14 @@ void Modulo_Socios_Profesionales_NuevoProfesional()
 					 				if(strcmp(centinela, "SI") == 0)
 					 				{
 										fseek(arch_profesionales, 2, SEEK_END);
+										
+										Reg_Profesionales.borrado = NULL;
+										Reg_Profesionales.prestamo = NULL;
+										
 										fwrite(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
 										
 										system("cls");
-										printf("Se ha cargado el socio existosamente...");
+										printf("Se ha cargado el socio exitosamente...");
 										printf("\n\n");
 										system("pause");
 										
@@ -4705,6 +4729,9 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 				
 				while(!feof(arch_profesionales) && bandera == false)
 				{
+					printf("Reg_Profesionales.prestamo: %d\n\n", Reg_Profesionales.prestamo);
+					system("pause");
+					
 					if( strcmp(target, Reg_Profesionales.id) == 0 && Reg_Profesionales.prestamo > 0 && Reg_Profesionales.borrado == false)
 					{
 						band_prestado = true;
@@ -4712,15 +4739,10 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 					}
 					
 					if( strcmp(target, Reg_Profesionales.id) == 0 && Reg_Profesionales.prestamo == 0 && Reg_Profesionales.borrado == false)
-					{
 						bandera = true;
-						fseek(arch_profesionales, (long)-sizeof(Reg_Profesionales), SEEK_CUR);
-					}
-					
+	
 					if(bandera == false)
-					{
 						fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);					
-					}
 		
 				}			
 					
@@ -4772,33 +4794,20 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 							
 							arch_profesionales = fopen("Profesionales.dat", "r+b");
 							
+							bandera = NULL;
 							rewind(arch_profesionales);
 							fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
 							
-							bandera = NULL;
-							band_prestado = NULL;
-							rewind(arch_profesionales);
-							fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+							/*printf("target actual: %s\n\n", target);
+							system("pause");*/
 							
 							while(!feof(arch_profesionales) && bandera == false)
 							{
-								if( strcmp(target, Reg_Profesionales.id) == 0 && Reg_Profesionales.prestamo > 0 && Reg_Profesionales.borrado == false)
-								{
-									band_prestado = true;
-									break;
-								}
-								
 								if( strcmp(target, Reg_Profesionales.id) == 0 && Reg_Profesionales.prestamo == 0 && Reg_Profesionales.borrado == false)
-								{
 									bandera = true;
-									fseek(arch_profesionales, (long)-sizeof(Reg_Profesionales), SEEK_CUR);
-								}
 								
 								if(bandera == false)
-								{
 									fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);					
-								}
-					
 							}
 						
 							printf("\n\n\tID: %s", Reg_Profesionales.id);
@@ -4878,19 +4887,35 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 									{
 										// ------ CARGA DE DATOS EN EL REGISTRO ------
 										
-											band_id = false;	
-											band_apeYNom = false;
-											band_telefono = false;
-											band_dni = false;
+											fclose(arch_profesionales);		
+											arch_profesionales = fopen("Profesionales.dat", "r+b");
+										
+											bandera = NULL;
+											rewind(arch_profesionales);
+											fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
+											
+											while(!feof(arch_profesionales) && bandera == false)
+											{
+												
+												if( strcmp(target, Reg_Profesionales.id) == 0 && Reg_Profesionales.prestamo == 0 && Reg_Profesionales.borrado == false)
+												{
+													bandera = true;
+													fseek(arch_profesionales, (long)-sizeof(Reg_Profesionales), SEEK_CUR);
+												}
+												
+												if(bandera == false)
+													fread(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);					
+											}																				
+										
+											band_id = NULL;	
+											band_apeYNom = NULL;
+											band_telefono = NULL;
+											band_dni = NULL;
 											
 											if( strlen(id) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
 											{
-												strcpy(Reg_Profesionales.id, id);
-												band_id = true;					
-												
-												printf("%s", Reg_Profesionales.id);
-												printf("\n\n");
-												system("pause");					
+												strcpy(Reg_Profesionales.id, id);											
+												band_id = true;										
 											}
 											if( strlen(apeYNom) != 0 )
 											{
@@ -4907,8 +4932,9 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 												strcpy(Reg_Profesionales.dni, dni);
 												band_dni = true;										
 											}
-																																												
-												
+											
+											strcpy(auxiliar, target);										
+	
 										// -------------------------------------------	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 										
 										// ----------------------------------------------- CARGA DEL REGISTRO EN EL ARCHIVO -----------------------------------------------
@@ -4920,12 +4946,16 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 												system("pause");*/
 												
 												fwrite(&Reg_Profesionales, sizeof(Reg_Profesionales), 1, arch_profesionales);
-																								
+												fclose(arch_profesionales);	
+																							
 												system("cls");
 												printf("Se edito el profesional exitosamente...");
 												printf("\n\n");
 												system("pause");
 												system("cls");
+												
+												if( strlen(id) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
+													strcpy(auxiliar, id);																			
 												
 												for(int i=0; i<strlen(id); i++) // Revalorizacion de cadenas a un valor nulo.
 													id[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el objeto.
@@ -4937,7 +4967,9 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 													telefono[i] = NULL;
 												
 												for(int i=0; i<strlen(dni); i++)
-													dni[i] = NULL;
+													dni[i] = NULL;		
+													
+												strcpy(target, auxiliar);				
 											}
 											else
 											{
@@ -4965,7 +4997,7 @@ void Modulo_Socios_Profesionales_EditarProfesional()
 										
 										// --- REVALORIZACIÓN DE VARIABLES A UN VALOR NULO ---
 											 
-											Reg_Profesionales.borrado = false;
+											Reg_Profesionales.borrado = NULL;
 											
 											for(int i=0; i<strlen(id); i++) // Revalorizacion de cadenas a un valor nulo.
 												id[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el objeto.
@@ -5288,10 +5320,13 @@ void Modulo_Socios_Profesionales_BuscarProfesional()
 		
 		string target = {NULL};		
 		
-		bool bandera = false;
+		bool bandera = NULL;
 		
 		// ------------ BUSQUEDA DEL ID DEL ESTUDIANTE EN EL ARCHIVO ------------
-		
+		do
+		{	
+			bandera = NULL;
+			
 			system("cls");
 			printf("-- BUSQUEDA DE UN SOCIO --");
 			printf("\n\n(Si desea cancelar, escriba 'salir')");	
@@ -5319,36 +5354,34 @@ void Modulo_Socios_Profesionales_BuscarProfesional()
 			}
 						
 		// ---------------------------------------------------------------------
-		
-		if(bandera == true)
-		{
-			system("cls");
-			printf("Se ha encontrado el profesional exitosamente...");
 			
-			printf("\n\n\tID: %s", Reg_Profesionales.id);
-			printf("\n\tApellido y nombre: %s", Reg_Profesionales.apeYNom);
-			printf("\n\tDNI: %s", Reg_Profesionales.dni);
-			printf("\n\tTelefono: %s", Reg_Profesionales.telefono);
-			
-			printf("\n\n");
-			system("pause");
-			system("cls");	
-			
-			fclose(arch_profesionales);		
-		}
-		else
-		{
-			system("cls");
-			printf("No se encontro el ID del profesional ingresado...");
-			printf("\n\nVolviendo a pantalla anterior...");
-			printf("\n\n");
-			system("pause");
-			system("cls");
+			if(bandera == true)
+			{
+				system("cls");
+				printf("Se ha encontrado el profesional exitosamente...");
 				
-			fclose(arch_profesionales);	
-			Modulo_Socios_Profesionales(); // Retornar a la funcion
+				printf("\n\n\tID: %s", Reg_Profesionales.id);
+				printf("\n\tApellido y nombre: %s", Reg_Profesionales.apeYNom);
+				printf("\n\tDNI: %s", Reg_Profesionales.dni);
+				printf("\n\tTelefono: %s", Reg_Profesionales.telefono);
+				
+				printf("\n\n");
+				system("pause");
+				system("cls");	
+				
+				fclose(arch_profesionales);		
+			}
+			else
+			{
+				system("cls");
+				printf("No se encontro el ID del profesional ingresado. Ingrese nuevamente...");
+				printf("\n\n");
+				system("pause");
+			}
 		}
-	}	
+		while(bandera == false);
+	}
+
 }
 
 // **************************************************
@@ -7162,22 +7195,22 @@ void Modulo_Prestamos_Libros_Editar()
 													fread(&Reg_Libros, sizeof(Reg_Libros), 1, arch_libros);
 											}
 											
-											printf("Cantidad actual del libro: %d\n\n", Reg_Libros.existencias);
+											/*printf("Cantidad actual del libro: %d\n\n", Reg_Libros.existencias);
 											system("pause");
 											
 											printf("Cantidad actual del prestamo: %d\n\n", Reg_Prestamos_L.cantidad);
-											system("pause");
+											system("pause");*/
 											
 											nuevaCantidad = Reg_Libros.existencias + Reg_Prestamos_L.cantidad;
 											
-											printf("Nueva cantidad del libro: %d\n\n", nuevaCantidad);
-											system("pause");
+											/*printf("Nueva cantidad del libro: %d\n\n", nuevaCantidad);
+											system("pause");*/
 											
 											Reg_Libros.existencias = nuevaCantidad - cantidad;
 											aux_cantidad = Reg_Libros.existencias;
 											
-											printf("Nueva cantidad del libro: %d\n\n", Reg_Libros.existencias);
-											system("pause");
+											/*printf("Nueva cantidad del libro: %d\n\n", Reg_Libros.existencias);
+											system("pause");*/
 											
 											if(nuevaCantidad < 0)
 											{
@@ -7213,6 +7246,8 @@ void Modulo_Prestamos_Libros_Editar()
 												band_cantidad = true;
 												Reg_Prestamos_L.cantidad = cantidad;
 											}
+											
+											strcpy(auxiliar, target);
 																																													
 										// -------------------------------------------	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 										
@@ -7258,11 +7293,15 @@ void Modulo_Prestamos_Libros_Editar()
 													system("pause");
 													system("cls");
 													
+													if( strlen(codigo) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
+														strcpy(auxiliar, codigo);
+													
 													for(int i=0; i<strlen(codigo); i++) // Revalorizacion de cadenas a un valor nulo.
 														codigo[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el objeto.
 													
 													cantidad = NULL;		
-								
+													
+													strcpy(target, auxiliar);
 											}
 											
 											if(band_codigo == false && band_cantidad == false)
@@ -9392,10 +9431,7 @@ void Modulo_Prestamos_Objetos_Editar()
 								}
 								
 								if(bandera == false)
-								{
-									fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);					
-								}
-					
+									fread(&Reg_Prestamos_O, sizeof(Reg_Prestamos_O), 1, arch_prestamos_o);
 							}
 						
 							printf("\n\n\tCodigo de prestamo: %s", Reg_Prestamos_O.codigo);
@@ -9460,22 +9496,22 @@ void Modulo_Prestamos_Objetos_Editar()
 													fread(&Reg_Objetos, sizeof(Reg_Objetos), 1, arch_objetos);
 											}
 											
-											printf("Cantidad actual del objetos: %d\n\n", Reg_Objetos.existencias);
+											/*printf("Cantidad actual del objetos: %d\n\n", Reg_Objetos.existencias);
 											system("pause");
 											
 											printf("Cantidad actual del prestamo: %d\n\n", Reg_Prestamos_O.cantidad);
-											system("pause");
+											system("pause");*/
 											
 											nuevaCantidad = Reg_Objetos.existencias + Reg_Prestamos_O.cantidad;
 											
-											printf("Nueva cantidad del objetos: %d\n\n", nuevaCantidad);
-											system("pause");
+											/*printf("Nueva cantidad del objetos: %d\n\n", nuevaCantidad);
+											system("pause");*/
 											
 											Reg_Objetos.existencias = nuevaCantidad - cantidad;
 											aux_cantidad = Reg_Objetos.existencias;
 											
-											printf("Nueva cantidad del objetos: %d\n\n", Reg_Objetos.existencias);
-											system("pause");
+											/*printf("Nueva cantidad del objetos: %d\n\n", Reg_Objetos.existencias);
+											system("pause");*/
 											
 											if(nuevaCantidad < 0)
 											{
@@ -9501,9 +9537,9 @@ void Modulo_Prestamos_Objetos_Editar()
 												strcpy(Reg_Prestamos_O.codigo, codigo);
 												band_codigo = true;					
 												
-												printf("%s", Reg_Prestamos_O.codigo);
+												/*printf("%s", Reg_Prestamos_O.codigo);
 												printf("\n\n");
-												system("pause");					
+												system("pause");*/			
 											}
 											
 											if( cantidad > 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
@@ -9511,7 +9547,8 @@ void Modulo_Prestamos_Objetos_Editar()
 												band_cantidad = true;
 												Reg_Prestamos_O.cantidad = cantidad;
 											}
-																																																						
+												
+											strcpy(auxiliar, target);																																											
 										// -------------------------------------------	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 										
 										// ----------------------------------------------- CARGA DEL REGISTRO EN EL ARCHIVO -----------------------------------------------
@@ -9521,7 +9558,6 @@ void Modulo_Prestamos_Objetos_Editar()
 													if(band_cantidad == true)
 													{
 														arch_objetos = fopen("Objetos.dat", "r+b");
-														
 														if(arch_objetos != NULL)
 														{
 															objeto_encontrado = NULL;
@@ -9556,11 +9592,15 @@ void Modulo_Prestamos_Objetos_Editar()
 													system("pause");
 													system("cls");
 													
+													if( strlen(codigo) != 0 ) // Si el valor de la variable es nulo, entonces no se carga al campo del registro.
+														strcpy(auxiliar, codigo);
+													
 													for(int i=0; i<strlen(codigo); i++) // Revalorizacion de cadenas a un valor nulo.
 														codigo[i] = NULL;				// Esto se hace para limpiar los campos (Actual: ---) una vez editado el objeto.
 													
 													cantidad = NULL;		
-								
+													
+													strcpy(target, auxiliar);
 											}
 											
 											if(band_codigo == false && band_cantidad == false)
@@ -10150,7 +10190,6 @@ void Modulo_Prestamos_Objetos_Buscar()
 			} // Cierre switch principal
 		}
 		while(true);
-		
 		
 		fclose(arch_prestamos_o);
 		system("pause");
